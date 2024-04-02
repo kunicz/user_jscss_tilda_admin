@@ -1,0 +1,18 @@
+/* увеличиваем область редактирования товаров */
+.tstore__editbox{width:800px!important}
+.tstore__editbox__updatesavebuttons,.tstore__editbox__form{width:100%!important}
+.tstore__editbox__form-wrapper{padding:0 20px}
+
+/*tableProducts*/
+/*.td-prod__head-sku,.td-prod__sku{display:none}*/
+#lastArticle{font-weight:bold}
+td.td-prod__head-uid,td.td-prod__td-uid{width:140px}
+td.td-prod__head-sku,td.td-prod__sku{width:75px} /*165 - 80*/
+td.td-prod__head-price,td.td-prod__price{width:110px} /*140 - 30*/
+td.td-prod__head-quantity,td.td-prod__quantity{width:70px} /*100 - 30*/
+.copyBtn{cursor:pointer;display:inline;vertical-align:super;}
+.copyBtn:after{font-size:.9em;opacity:.5;content:' ❐';cursor:pointer}
+.td-prod__td-title__btn sup{vertical-align:super;font-size:11px;opacity:.4}
+.skuDisclaimer.pe-hint{padding:20px 0 0 0;}
+.skuDisclaimer span{cursor:pointer;margin-right:10px;display:inline-block}
+.skuDisclaimer b{color:#000;font-weight:bold}
