@@ -1,18 +1,14 @@
-import { store } from './store';
-import { page } from './page';
+import { store } from './pages/store';
+import { page } from './pages/page';
 
-const int = setInterval(() => {
+setTimeout(() => {
 	if (!window.projectid) return; // projectid - переменная задается тильдой
 
 	projectCredentials();
+	store();
+	page();
 
-	setTimeout(() => {
-		store();
-		page();
-	}, 500);
-
-	clearInterval(int);
-}, 100);
+}, 500);
 
 function projectCredentials() {
 	const projects = {

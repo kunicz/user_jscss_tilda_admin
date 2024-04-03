@@ -1,4 +1,4 @@
-/* увеличиваем область редактирования товаров */
+/*увеличиваем область редактирования товаров*/
 .tstore__editbox{width:800px!important}
 .tstore__editbox__updatesavebuttons,.tstore__editbox__form{width:100%!important}
 .tstore__editbox__form-wrapper{padding:0 20px}

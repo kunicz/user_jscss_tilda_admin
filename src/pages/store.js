@@ -1,6 +1,6 @@
-import * as Products from './classes/Products.js';
-import * as Product_info from './classes/Product_info.js';
-import './css/store.css';
+import * as Products from '../classes/Products.js';
+import * as Product_info from '../classes/Product_info.js';
+import '../css/store.css';
 
 export function store() {
 

@@ -21,6 +21,7 @@ export class Product {
 
 			// название товара
 			this.title = this.node.find(`.${this.t}td-title__btn`).text().trim();
+			this.node.find(`.${this.t}td-title__btn`).wrapInner('<span></span>').append(this.copyBtn());
 
 			//uid товара
 			this.tildaId = this.node.data('store-product-uid');
@@ -65,15 +66,19 @@ export class Product {
 	}
 
 	uidTd() {
+		const td = $(`<td class="${this.t}-uid"><span>${this.tildaId}</span></td>`);
+		td.append(this.copyBtn());
+		td.insertAfter(this.node.find(`.${this.t}td-title`));
+	}
+
+	copyBtn() {
 		const copyBtn = $(`<div class="copyBtn"></div>`);
-		copyBtn.on('click', function () {
-			const value = $(this).prev().text();
+		copyBtn.on('click', function (e) {
+			e.preventDefault();
+			const value = $(this).prev().text().trim();
 			navigator.clipboard.writeText(value);
 		});
-
-		const td = $(`<td class="${this.t}-uid"><span>${this.tildaId}</span></td>`);
-		td.append(copyBtn);
-		td.insertAfter(this.node.find(`.${this.t}td-title`));
+		return copyBtn;
 	}
 
 }
