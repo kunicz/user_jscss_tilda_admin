@@ -1,3 +1,5 @@
+import copyBtn from "kunicz_copybtn";
+
 export class Product {
 
 	t = 'td-prod__';
@@ -10,7 +12,7 @@ export class Product {
 	}
 
 	process() {
-		return new Promise((resolve, reject) => {
+		return Promise((resolve) => {
 
 			//class
 			if (this.node.is('.processed')) {
@@ -21,7 +23,7 @@ export class Product {
 
 			// название товара
 			this.title = this.node.find(`.${this.t}td-title__btn`).text().trim();
-			this.node.find(`.${this.t}td-title__btn`).wrapInner('<span></span>').append(this.copyBtn());
+			this.node.find(`.${this.t}td-title__btn`).append(copyBtn(this.title));
 
 			//uid товара
 			this.tildaId = this.node.data('store-product-uid');
@@ -66,19 +68,9 @@ export class Product {
 	}
 
 	uidTd() {
-		const td = $(`<td class="${this.t}-uid"><span>${this.tildaId}</span></td>`);
-		td.append(this.copyBtn());
+		const td = $(`<td class="${this.t}-uid">${this.tildaId}</td>`);
+		td.append(copyBtn(this.tildaId));
 		td.insertAfter(this.node.find(`.${this.t}td-title`));
-	}
-
-	copyBtn() {
-		const copyBtn = $(`<div class="copyBtn"></div>`);
-		copyBtn.on('click', function (e) {
-			e.preventDefault();
-			const value = $(this).prev().text().trim();
-			navigator.clipboard.writeText(value);
-		});
-		return copyBtn;
 	}
 
 }
