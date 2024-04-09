@@ -12,7 +12,7 @@ export class Product {
 	}
 
 	process() {
-		return Promise((resolve) => {
+		return new Promise((resolve) => {
 
 			//class
 			if (this.node.is('.processed')) {
