@@ -39,15 +39,15 @@ export class Product {
 				resolve();
 				return;
 			}
-			$(expandBtn).trigger('click');
+			expandBtn.trigger('click');
 			const int = setInterval(() => {
-				if (!this.node.next()) return;
-				if (!this.node.next().is('.js-edition')) return;
+				const variants = this.node.children('.js-edition');
+				if (!variants.length) return;
 
-				this.defineArticle(this.node.next().find(`.${this.t}sku`).text());
+				this.defineArticle(variants.eq(0).find(`.${this.t}sku`).text());
 				this.lastArticle();
 
-				expandBtn.click();
+				expandBtn.trigger('click');
 				clearInterval(int);
 				resolve();
 			}, 100);
