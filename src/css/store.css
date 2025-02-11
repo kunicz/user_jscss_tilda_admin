@@ -13,3 +13,11 @@ td.td-prod__head-quantity,td.td-prod__quantity{width:70px} /*100 - 30*/
 .skuDisclaimer.pe-hint{padding:20px 0 0 0;}
 .skuDisclaimer span{cursor:pointer;margin-right:10px;display:inline-block}
 .skuDisclaimer b{color:#000;font-weight:bold}
+
+/*окно редактиирования товара*/
+#grouptitle_tabs, #group_tabs, #group_tabs + hr,
+#grouptitle_meta, #group_meta, #group_meta + hr,
+#grouptitle_units, #group_units, #group_units + hr,
+#group_characteristics .pe-form-group
+{display:none}
+#group_characteristics,#group_properties{display: block !important;}

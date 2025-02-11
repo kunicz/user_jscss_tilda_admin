@@ -1,21 +1,29 @@
-import { store } from './pages/store';
-import { page } from './pages/page';
+import { projects } from './projects';
+import { store } from './store';
+import { page } from './page';
+import { db, wait, cache } from '@helpers';
 
-setTimeout(async () => {
-	if (!window.projectid) return; // projectid - переменная задается тильдой
+export const shops = cache();
+export const shop = cache();
 
-	if (!await projectCredentials()) return;
-	store();
-	page();
+window.BUNDLE_VERSION = '2.0.1';
 
-}, 500);
+process();
+async function process() {
+	try {
+		await wait();
 
-async function projectCredentials() {
-	const response = await fetch('https://php.2steblya.ru/ajax.php?script=FromDB&request=shops');
-	const fromDB = await response.json();
-	if (!fromDB.success) return false;
-	const shops = fromDB.response;
-	window.projectIds = shops.map(shop => shop.shop_tilda_id);
-	window.projectTitle = shops.find(shop => shop.shop_tilda_id == window.projectid.toString())['shop_crm_code'];
-	return true;
+		shops.set(await db.getShops());
+
+		if (projects()) return;
+
+		shop.set(await db.getShop({ shop_tilda_id: window.projectid }));
+		if (!shop.get()) return;
+
+		await page();
+		await store();
+
+	} catch (error) {
+		console.error(error);
+	}
 }

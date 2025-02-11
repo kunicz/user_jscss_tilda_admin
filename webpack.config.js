@@ -1,9 +1,18 @@
 const TerserPlugin = require('terser-webpack-plugin');
+const path = require('path');
 
 module.exports = {
 	mode: 'production',
 	output: {
-		filename: 'tilda.admin.js',
+		path: path.resolve(__dirname, '../'),
+		filename: 'tilda_admin.js',
+	},
+	resolve: {
+		alias: {
+			'@helpers': path.resolve(__dirname, '../../@helpers'),
+			'@root': path.resolve(__dirname, '../../')
+		},
+		extensions: ['.js', '.jsx', '.json'],  // Поддерживаем расширения
 	},
 	module: {
 		rules: [
@@ -43,5 +52,5 @@ module.exports = {
 		]
 	},
 	watch: true,
-	devtool: 'source-map'
+	devtool: 'inline-source-map'
 };
