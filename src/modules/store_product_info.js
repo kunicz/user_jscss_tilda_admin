@@ -1,5 +1,6 @@
 import { db, ctrlc, waitDomElement, mutationObserver, normalize } from '@helpers';
 import * as form from '@helpers/form';
+import { RESERVED_ARTICLES } from '@root/config';
 import { shop } from '../index';
 
 export function listen() {
@@ -230,13 +231,14 @@ function additionalFieldsIntegration($form, product) {
 			<label class="pe-label">Тип товара (не меняй, если не знаешь)</label>
 			<div class="pe-select">
 				<select class="pe-input pe-select" id="type">
-					<option value="">Стандартный</option>
-					<option value="888" ${product?.type == "888" ? 'selected' : ''}>Допник (все игрушки, свечи сюда)</option>
-					<option value="1111" ${product?.type == "1111" ? 'selected' : ''}>Донат</option>
-					<option value="666" ${product?.type == "666" ? 'selected' : ''}>Подписка</option>
-					<option value="999" ${product?.type == "999" ? 'selected' : ''}>Букет со свободной ценой (нитакой как все)</option>
-					<option value="1000" ${product?.type == "1000" ? 'selected' : ''}>Букет по персональному заказу (индпошив)</option>
-					<option value="000" ${product?.type == "000" ? 'selected' : ''}>Транспортировочное</option>
+				<option value="">Стандартный</option>
+					<option value="666" ${product?.type == "666" ? 'selected' : ''}>Подписка (666)</option>
+					<option value="777" ${product?.type == "777" ? 'selected' : ''}>Уникальный витринный (777)</option>
+					<option value="888" ${product?.type == "888" ? 'selected' : ''}>Допник (888)</option>
+					<option value="999" ${product?.type == "999" ? 'selected' : ''}>Нитакой как все (999)</option>
+					<option value="1000" ${product?.type == "1000" ? 'selected' : ''}>Индпошив (1000)</option>
+					<option value="1111" ${product?.type == "1111" ? 'selected' : ''}>Донат (1111)</option>
+					<option value="000" ${product?.type == "000" ? 'selected' : ''}>Транспортировочное (000)</option>
 				</select>
 			</div>
 		</div>
@@ -336,13 +338,13 @@ function insertOrUpdateToDb($form, product) {
 		const hasVariants = !mainArtikul;
 
 		// Очищаем артикул для получения SKU (только номер)
-		const sku = (mainArtikul ?? variantArtikul).replace(/-.*/, '').replace(/v$/, '');
+		const sku = parseInt((mainArtikul ?? variantArtikul).replace(/-.*/, '').replace(/v$/, ''));
 
 		// Обрабатывает артикул товара в зависимости от условий
 		const artikul = ((artikul) => {
 
 			// Если товар — подписка (артикул вида 666-title10x3)
-			if (hasVariants && sku === '666') {
+			if (hasVariants && sku === 666) {
 				artikul = artikul.replace(/\d+x\d+$/, '');
 			}
 
@@ -378,8 +380,8 @@ function insertOrUpdateToDb($form, product) {
 				data.id = productId;
 				data.shop_crm_id = shop.get().shop_crm_id;
 			}
-			data.sku = ['666', '777', '888'].includes(sku) ? artikul : sku;
-			data.vitrina_id = data.sku === '777' ? data.id : form.getInputValue($form.find('#vitrina_id')) || null;
+			data.sku = RESERVED_ARTICLES.includes(sku) ? artikul : sku;
+			data.vitrina_id = data.sku === 777 ? data.id : form.getInputValue($form.find('#vitrina_id')) || null;
 			data.title = form.getInputValue($form.find('[name="title"]'));
 			data.allowed_today = form.getNumberInputValue($form.find('#allowed_today'));
 			data.card_type = form.getSelectValue($form.find('#card_type'));
@@ -392,7 +394,7 @@ function insertOrUpdateToDb($form, product) {
 			data.select_gamma = form.getCheckboxValue($form.find('#select_gamma'));
 			data.days_to_close = form.getNumberInputValue($form.find('#days_to_close'));
 			data.purchase_price = form.getNumberInputValue($form.find('#purchase_price'));
-			data.type = form.getSelectValue($form.find('#type')) || null;
+			data.type = RESERVED_ARTICLES.includes(sku) ? sku : form.getSelectValue($form.find('#type')) || null;
 			data.date_to_open = form.getInputValue($form.find('#date_to_open')) || null;
 			data.card_content = (() => {
 				switch (data.card_type) {
@@ -422,6 +424,7 @@ function insertOrUpdateToDb($form, product) {
 		return data;
 
 
+
 		// Сбор данных о фотографиях
 		function collectPhotosData() {
 			data.photos = [];
@@ -449,7 +452,9 @@ function insertOrUpdateToDb($form, product) {
 
 			// Обработка специального поля "шта?"
 			if (window.projectid == 5683822) {
-				const shtaValue = form.getInputValue($form.find('.js-prod-characteristic:first .js-prod-charact-value'));
+				const shtaCont = $form.find('.js-prod-characteristic:first .js-prod-charact-value');
+				if (!shtaCont.length) return;
+				const shtaValue = form.getInputValue(shtaCont);
 				if (shtaValue) data.texts.shta = shtaValue;
 			}
 		}

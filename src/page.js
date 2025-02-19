@@ -32,8 +32,8 @@ async function frontendCssInAdmin() {
 
 	//применяем стили
 	$('head').append([
-		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/tilda.js/${shop.get().shop_crm_code}.min.css">`,
-		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/tilda.js/${shop.get().shop_crm_code}.min.css.map">`
+		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.get().shop_crm_code}.min.css">`,
+		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.get().shop_crm_code}.min.css.map">`
 	].join());
 	if (styles.length) {
 		$('body').append('<style id="styles_from_admin_tilda">' + styles.join('') + '</style>');

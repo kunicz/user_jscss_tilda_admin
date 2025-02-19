@@ -10,7 +10,6 @@ export async function listen() {
 		addedCallback: (node) => {
 			if (node.classList.contains('js-product')) {
 				product($(node));
-				console.log(1);
 			}
 		},
 		config: { childList: true, subtree: true }
