@@ -378,7 +378,7 @@ function insertOrUpdateToDb($form, product) {
 			if (!product.id) {
 				// только для insert
 				data.id = productId;
-				data.shop_crm_id = shop.get().shop_crm_id;
+				data.shop_crm_id = shop.shop_crm_id;
 			}
 			data.sku = RESERVED_ARTICLES.includes(sku) ? artikul : sku;
 			data.vitrina_id = data.sku === 777 ? data.id : form.getInputValue($form.find('#vitrina_id')) || null;
@@ -517,7 +517,7 @@ function insertOrUpdateToDb($form, product) {
 				args: {
 					set: data,
 					where: {
-						shop_crm_id: shop.get().shop_crm_id,
+						shop_crm_id: shop.shop_crm_id,
 						id: product.id
 					}
 				}

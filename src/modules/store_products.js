@@ -9,6 +9,7 @@ export async function listen() {
 	mutationObserver({
 		addedCallback: (node) => {
 			if (node.classList.contains('js-product')) {
+				uidTh();
 				product($(node));
 			}
 		},
@@ -18,6 +19,7 @@ export async function listen() {
 
 export function uidTh() {
 	const t = 'td-prod__head';
+	if ($(`.${t}-table .${t}-uid`).length) return;
 	$(`.${t}-table .${t}-title`).after(`<td class="${t}-uid">UID</td>`);
 }
 

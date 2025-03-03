@@ -6,7 +6,7 @@ import { db, wait, cache } from '@helpers';
 export const shops = cache();
 export const shop = cache();
 
-window.BUNDLE_VERSION = '2.0.1';
+window.BUNDLE_VERSION = '2.0.2';
 
 process();
 async function process() {
@@ -18,7 +18,7 @@ async function process() {
 		if (projects()) return;
 
 		shop.set(await db.getShop({ shop_tilda_id: window.projectid }));
-		if (!shop.get()) return;
+		if (!shop) return;
 
 		await page();
 		await store();

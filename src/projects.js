@@ -21,7 +21,7 @@ function cityInTitle() {
 		const $this = $(e);
 		const projectid = $this.data('project-id');
 		const title = $this.children('.td-site__title');
-		const projectshop = shops.get().find(s => s.shop_tilda_id == projectid);
+		const projectshop = shops.find(s => s.shop_tilda_id == projectid);
 		if (!projectshop) return;
 		title.html(title.html() + ' (' + projectshop.city_title + ')');
 	});

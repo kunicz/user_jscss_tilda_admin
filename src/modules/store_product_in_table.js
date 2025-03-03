@@ -1,4 +1,4 @@
-import { waitCheck, normalize } from '@helpers';
+import { waitCheck, normalize, ctrlc } from '@helpers';
 import { RESERVED_ARTICLES } from '@root/config';
 
 export async function product($node) {
@@ -51,7 +51,15 @@ export async function product($node) {
 	}
 
 	function uidTd() {
-		$(`<td class="${t}-uid">${tildaId}</td>`).insertAfter($node.find(`.${t}td-title`));
+		$(`<a>${tildaId}</a>`)
+			.on("click", function (e) {
+				e.preventDefault();
+				ctrlc(tildaId);
+			})
+			.wrap(`<td class="${t}uid"></td>`)
+			.parent()
+			.insertAfter($node.find(`.${t}td-title`));
 	}
+
 
 }
