@@ -1,15 +1,8 @@
-import { shop } from './index';
-import { wait } from '@helpers';
+import { shop } from '../index.js';
+import wait from '@helpers/wait.js';
 
-export async function page() {
-
-	if (window.location.pathname != '/page/') return false;
-
-	console.log('user_jscss: tilda.ru/page');
-
-	await frontendCssInAdmin();
-
-	return true;
+export default async () => {
+	frontendCssInAdmin();
 }
 
 /**
@@ -18,7 +11,7 @@ export async function page() {
  * применяет их на страницах "редактирвоания страниц"
  */
 async function frontendCssInAdmin() {
-	await wait(1000);
+	await wait.sec();
 
 	const styles = [];
 	$('[data-record-cod="T123"] .css').each(function () {
@@ -32,11 +25,11 @@ async function frontendCssInAdmin() {
 
 	//применяем стили
 	$('head').append([
-		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.get().shop_crm_code}.min.css">`,
-		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.get().shop_crm_code}.min.css.map">`
+		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.shop_crm_code}.min.css">`,
+		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.shop_crm_code}.min.css.map">`
 	].join());
 	if (styles.length) {
 		$('body').append('<style id="styles_from_admin_tilda">' + styles.join('') + '</style>');
-		console.log('jscss стили применены');
+		console.log('user_jscss: стили применены');
 	}
 }

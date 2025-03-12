@@ -1,18 +1,36 @@
-const TerserPlugin = require('terser-webpack-plugin');
-const path = require('path');
+import path from 'path';
+import { fileURLToPath } from 'url';
+import TerserPlugin from 'terser-webpack-plugin';
+import postcssDiscardComments from 'postcss-discard-comments';
+import SftpClient from 'ssh2-sftp-client';
+import SftpUploadPlugin from '../../ftp.mjs';
 
-module.exports = {
+const bundleName = 'tilda_admin.js';
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const resolvedPath = path.resolve(__dirname, '../');
+const sftpUploader = new SftpUploadPlugin({
+	sftpClient: new SftpClient(),
+	files: [{
+		localFolder: resolvedPath,
+		remoteFolder: 'jscss/user_jscss/',
+		bundleName
+	}]
+});
+
+export default {
 	mode: 'production',
+	entry: './src/index.js',
 	output: {
-		path: path.resolve(__dirname, '../'),
-		filename: 'tilda_admin.js',
+		path: resolvedPath,
+		filename: bundleName,
 	},
 	resolve: {
 		alias: {
-			'@helpers': path.resolve(__dirname, '../../@helpers'),
+			'@helpers': path.resolve(__dirname, '../../@helpers/modules'),
 			'@root': path.resolve(__dirname, '../../')
 		},
-		extensions: ['.js', '.jsx', '.json'],  // Поддерживаем расширения
+		extensions: ['.js', '.jsx', '.json'],
 	},
 	module: {
 		rules: [
@@ -26,7 +44,7 @@ module.exports = {
 						options: {
 							postcssOptions: {
 								plugins: [
-									require('postcss-discard-comments')({
+									postcssDiscardComments({
 										removeAll: true,
 									}),
 								],
@@ -51,5 +69,6 @@ module.exports = {
 			})
 		]
 	},
-	devtool: 'inline-source-map'
+	devtool: 'inline-source-map',
+	plugins: [sftpUploader]
 };

@@ -1,20 +1,15 @@
-import { product } from './store_product_in_table';
-import { mutationObserver, waitDomElement } from '@helpers';
+import product from './store_product_in_table.js';
+import dom from '@helpers/dom';
+import wait from '@helpers/wait';
 
-export async function listen() {
+export async function watch() {
 	const selector = '.js-product:not(.processed)';
-	if (!await waitDomElement(selector)) return;
+	if (!await wait.element(selector)) return;
 
+	// обрабатываем товары
 	$(selector).each((_, e) => product($(e)));
-	mutationObserver({
-		addedCallback: (node) => {
-			if (node.classList.contains('js-product')) {
-				uidTh();
-				product($(node));
-			}
-		},
-		config: { childList: true, subtree: true }
-	});
+	// наблюдаем за появлением новых товаров
+	dom.watcher().setSelector(selector).setCallback((node) => product($(node))).start();
 }
 
 export function uidTh() {

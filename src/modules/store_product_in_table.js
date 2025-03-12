@@ -1,23 +1,21 @@
-import { waitCheck, normalize, ctrlc } from '@helpers';
-import { RESERVED_ARTICLES } from '@root/config';
+import { ctrlc } from '@helpers/clipboard.js';
+import wait from '@helpers/wait.js';
+import normalize from '@helpers/normalize.js';
+import { RESERVED_ARTICLES } from '@root/config.js';
 
-export async function product($node) {
-
+export default async ($node) => {
 	let t = 'td-prod__';
 	let title = null;
 	let article = null;
 	let tildaId = null;
 
-	process();
-
-	async function process() {
+	(async () => {
 		//class
 		if ($node.is('.processed')) return;
 		$node.addClass('processed');
 
 		// название товара
 		title = $node.find(`.${t}td-title__btn`).text().trim();
-		$node.find(`.${t}td-title__btn`);
 
 		//uid товара
 		tildaId = $node.data('store-product-uid');
@@ -31,11 +29,13 @@ export async function product($node) {
 		if (!$expandBtn.length) return;
 
 		$expandBtn.trigger('click');
-		await waitCheck(() => $node.children('.js-edition').length);
+
+		const checkResult = await wait.check(() => $node.children('.js-edition').length);
+		if (!checkResult) throw new Error('Не удалось дождаться появления вариантов товара');
 		processArticle($node.children('.js-edition').eq(0).find(`.${t}sku`).text());
 
 		$expandBtn.trigger('click');
-	}
+	})();
 
 	function processArticle(sku) {
 		article = normalize.int(sku.replace(/\-.+/, ''));
@@ -60,6 +60,4 @@ export async function product($node) {
 			.parent()
 			.insertAfter($node.find(`.${t}td-title`));
 	}
-
-
 }

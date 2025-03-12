@@ -1,29 +1,33 @@
-import { projects } from './projects';
-import { store } from './store';
-import { page } from './page';
-import { db, wait, cache } from '@helpers';
+import * as pages from './pages/index.js';
+import db from '@helpers/db';
 
-export const shops = cache();
-export const shop = cache();
+export let shops = [];
+export let shop = {};
 
-window.BUNDLE_VERSION = '2.0.2';
+window.BUNDLE_VERSION = '2.1.0';
 
-process();
-async function process() {
+$(document).ready(async () => {
 	try {
-		await wait();
-
-		shops.set(await db.getShops());
-
-		if (projects()) return;
-
-		shop.set(await db.getShop({ shop_tilda_id: window.projectid }));
-		if (!shop) return;
-
-		await page();
-		await store();
-
+		shops = await db.getShops();
+		page();
 	} catch (error) {
 		console.error(error);
+	}
+});
+
+export function page(pageTite) {
+	if (pageTite) {
+		runPage(pageTite);
+	} else {
+		Object.entries(pages.routes).forEach(async ([title, pattern]) => {
+			if (!new RegExp(pattern).test(window.location.href)) return;
+			runPage(title);
+		});
+	}
+
+	async function runPage(title) {
+		console.log(`user_jscss: tilda.ru/${title}`);
+		shop = await db.getShop({ shop_tilda_id: window.projectid }) || {};
+		if (pages[title]) pages[title]();
 	}
 }

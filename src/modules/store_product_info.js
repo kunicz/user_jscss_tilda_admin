@@ -1,30 +1,31 @@
-import { db, ctrlc, waitDomElement, mutationObserver, normalize } from '@helpers';
-import * as form from '@helpers/form';
-import { RESERVED_ARTICLES } from '@root/config';
-import { shop } from '../index';
+import db from '@helpers/db';
+import { ctrlc } from '@helpers/clipboard.js';
+import wait from '@helpers/wait.js';
+import dom from '@helpers/dom';
+import normalize from '@helpers/normalize.js';
+import form from '@helpers/form.js';
+import { RESERVED_ARTICLES } from '@root/config.js';
+import { shop } from '../index.js';
 
-export function listen() {
-	// запускаем, если сразу открывается товар в админке
-	if (window.location.search.indexOf('productuid')) {
-		process();
-	}
-
-	// наблюдаем за изменениями DOM, чтобы отслеживать появление tstore__editbox
-	mutationObserver({
-		addedCallback: node => {
-			if (node?.classList.contains('tstore__editbox')) {
-				process();
-			}
-		}
-	});
+/**
+ * Инициализирует наблюдение за появлением формы редактирования товара
+ * Запускается при прямом открытии товара или при появлении формы в DOM
+ */
+export function watch() {
+	if (window.location.search.indexOf('productuid')) process();
+	dom.watcher().setSelector('.tstore__editbox').setCallback(process).start();
 }
 
+/**
+ * Основная функция обработки формы товара
+ * Инициализирует все необходимые интеграции и модификации формы
+ * @returns {Promise<void>}
+ */
 async function process() {
-	const formElement = await waitDomElement('[id^="productform"]');
+	const formElement = await wait.element('[id^="productform"]');
 	if (!formElement) return;
 
 	const $form = $(formElement);
-
 	articlesTips($form);
 	longAndShortText($form);
 	dbIntegration($form);
@@ -35,10 +36,11 @@ async function process() {
  * Описание -> Короткий текст
  * Текст -> Длинный текст
  * 
- * @param {Jquery} $form 
+ * @param {JQuery} $form - jQuery объект формы товара
  */
-function longAndShortText($form) {
-	var $formgroups = $form.children('.pe-form-group');
+async function longAndShortText($form) {
+	await wait.halfsec();
+	const $formgroups = $form.children('.pe-form-group');
 	$formgroups.eq(1).children('.pe-label').text('Короткий текст');
 	$formgroups.eq(2).children('.pe-label').text('Длинный текст');
 }
@@ -47,7 +49,7 @@ function longAndShortText($form) {
  * добавляем блок с подсказками к буквенными идентификаторами для sku
  * при клике - буквенный идентификатор попадает в буфер обмена
  * 
- * @param {Jquery} $form 
+ * @param {JQuery} $form - jQuery объект формы товара
  */
 function articlesTips($form) {
 	const disclaimer = $('<div class="pe-hint skuDisclaimer"></div>');
@@ -76,7 +78,10 @@ function articlesTips($form) {
 /**
  * создаем дополнительные чекбоксы, инпуты и селекты
  * получаем данные о товаре из БД, проставляем значения в эти поля
- * при сохранении товара создаем/обновляем данные в БД 
+ * при сохранении товара создаем/обновляем данные в БД
+ * 
+ * @param {JQuery} $form - jQuery объект формы товара
+ * @returns {Promise<void>}
  */
 async function dbIntegration($form) {
 	//витринные варианты каталожных товаров не обрабатываем
@@ -91,34 +96,39 @@ async function dbIntegration($form) {
 			limit: 1
 		}
 	});
+	if (product) product.card_content = normalize.cardText(product?.card_content);
 
 	galleryIntegration($form, product);
 	additionalFieldsIntegration($form, product);
 	insertOrUpdateToDb($form, product);
 }
 
+/**
+ * Интегрирует функционал работы с галереей товара
+ * Добавляет поля для форматов и дополнительного текста к фотографиям
+ * 
+ * @param {JQuery} $form - jQuery объект формы товара
+ * @param {Object} product - Данные о товаре из БД
+ */
 function galleryIntegration($form, product) {
 
 	init();
 	addAutoFillGalleryButton();
 	attachUpdateformatEvents();
 
+	/**
+	 * Инициализирует обработку элементов галереи
+	 * Добавляет поля к существующим элементам и настраивает наблюдение за новыми
+	 */
 	function init() {
-		// Добавляем поля для существующих элементов галереи
 		$form.find('.js-gallery-item').each((_, item) => processGalleryItem($(item)));
-
-		// Наблюдаем за добавлением новых элементов в галерею
-		mutationObserver({
-			targetNode: $form.find('.js-gallery-items').get(0),
-			addedCallback: node => {
-				if (node?.classList.contains('js-gallery-item')) {
-					processGalleryItem($(node));
-				}
-			}
-		});
+		dom.watcher().setSelector('.js-gallery-items').setCallback((node) => processGalleryItem($(node))).start();
 	}
 
-	// Обрабатывает элемент галереи
+	/**
+	 * Обрабатывает элемент галереи: добавляет поля формата и доп. текста
+	 * @param {JQuery} $item - jQuery объект элемента галереи
+	 */
 	function processGalleryItem($item) {
 		if ($item.find('.naPhoto__razmer').length) return; // Пропускаем, если поля уже добавлены
 
@@ -131,14 +141,22 @@ function galleryIntegration($form, product) {
 		addDopTextField($item, photoData?.naphoto_doptext);
 	}
 
-	// Получает доступные форматы из DOM
+	/**
+	 * Получает список доступных форматов из DOM
+	 * @returns {Array<string>} Массив доступных форматов
+	 */
 	function getAvailableformats() {
 		const formats = [];
 		$form.find('.tstore__editions-controls__opt-col input').each((_, input) => formats.push($(input).val()));
 		return formats;
 	}
 
-	// Добавляет новую опцию, если появился новый вариант
+	/**
+	 * Генерирует HTML-строку опций для select с форматами
+	 * @param {Array<string>} formats - Массив доступных форматов
+	 * @param {string} selectedformat - Выбранный формат
+	 * @returns {string} HTML-строка с опциями
+	 */
 	function generateformatOptions(formats, selectedformat) {
 		return formats.map(format => {
 			const isSelected = format === selectedformat ? 'selected' : '';
@@ -146,14 +164,23 @@ function galleryIntegration($form, product) {
 		}).join('');
 	}
 
-	// Добавляет выпадающий список для выбора формата
+	/**
+	 * Добавляет select для выбора формата к элементу галереи
+	 * @param {JQuery} $item - jQuery объект элемента галереи
+	 * @param {Array<string>} formats - Массив доступных форматов
+	 * @param {string} selectedformat - Выбранный формат
+	 */
 	function addformatSelect($item, formats, selectedformat) {
-		const selectOptions = form.generateOptions(formats, selectedformat, true);
+		const selectOptions = form.options(formats, selectedformat, true);
 		const formatSelectHTML = `<td><select class="naPhoto__razmer">${selectOptions}</select></td>`;
 		$item.find('.tstore__editbox__gal-thumb-title').after(formatSelectHTML);
 	}
 
-	// Добавляет поле для дополнительного текста
+	/**
+	 * Добавляет поле для дополнительного текста к элементу галереи
+	 * @param {JQuery} $item - jQuery объект элемента галереи
+	 * @param {string} dopText - Дополнительный текст
+	 */
 	function addDopTextField($item, dopText) {
 		const dopTextHTML = `
         <label class="pe-label">Дополнительный текст на плашке</label>
@@ -162,20 +189,29 @@ function galleryIntegration($form, product) {
 		$item.find('.js-gallery-item-showmore-div').prepend(dopTextHTML);
 	}
 
-	// Получает данные о фото по URL
+	/**
+	 * Получает данные о фото из массива фотографий по URL
+	 * @param {Array<Object>} photos - Массив фотографий
+	 * @param {string} imgSrc - URL фотографии
+	 * @returns {Object|null} Данные о фотографии или null
+	 */
 	function getPhotoData(photos, imgSrc) {
 		if (!Array.isArray(photos) || !photos.length) return null;
 		return photos.find(photo => photo.url === imgSrc);
 	}
 
-	// Добавляет кнопку для автоматического заполнения форматов
+	/**
+	 * Добавляет кнопку для автоматического заполнения форматов
+	 */
 	function addAutoFillGalleryButton() {
 		$('<button type="button" class="tstore_variants__edit-options">Заполнить "на фото" автоматически</button>')
 			.insertAfter($form.find('.js-gallery-box'))
 			.on('click', autoFillGallery);
 	}
 
-	// Автоматически заполняет "на фото"
+	/**
+	 * Автоматически заполняет форматы для фотографий на основе вариантов товара
+	 */
 	function autoFillGallery() {
 		const $galleryItems = $form.find('.js-gallery-item');
 		//не трогаем две первых фотки для продуктов с карточками
@@ -207,13 +243,17 @@ function galleryIntegration($form, product) {
 		});
 	}
 
-	// Вешаем события для обновления форматов
+	/**
+	 * Добавляет обработчики событий для обновления форматов
+	 */
 	function attachUpdateformatEvents() {
 		$form.on('change', '.tstore__editions-controls__opt-col input', updateformats);
 		$form.on('click', '.tstore_variants__delete', updateformats);
 	}
 
-	// Обновляет форматы в галерее
+	/**
+	 * Обновляет списки форматов во всех элементах галереи
+	 */
 	function updateformats() {
 		const formats = getAvailableformats();
 		$form.find('.naPhoto__razmer').each(function () {
@@ -224,14 +264,20 @@ function galleryIntegration($form, product) {
 	}
 }
 
+/**
+ * Добавляет дополнительные поля в форму товара
+ * и заполняет их значениями из БД
+ * 
+ * @param {JQuery} $form - jQuery объект формы товара
+ * @param {Object} product - Данные о товаре из БД
+ */
 function additionalFieldsIntegration($form, product) {
-	//поля, наполняем их значениями из БД
 	$(`
 		<div class="pe-form-group">
 			<label class="pe-label">Тип товара (не меняй, если не знаешь)</label>
 			<div class="pe-select">
 				<select class="pe-input pe-select" id="type">
-				<option value="">Стандартный</option>
+					<option value="">Стандартный</option>
 					<option value="666" ${product?.type == "666" ? 'selected' : ''}>Подписка (666)</option>
 					<option value="777" ${product?.type == "777" ? 'selected' : ''}>Уникальный витринный (777)</option>
 					<option value="888" ${product?.type == "888" ? 'selected' : ''}>Допник (888)</option>
@@ -314,6 +360,12 @@ function additionalFieldsIntegration($form, product) {
 	`).insertBefore($form.find('.pe-form-group').eq(-3));
 }
 
+/**
+ * Обрабатывает сохранение товара: собирает данные из формы и отправляет в БД
+ * 
+ * @param {JQuery} $form - jQuery объект формы товара
+ * @param {Object} product - Данные о товаре из БД
+ */
 function insertOrUpdateToDb($form, product) {
 	$('.tstore__editbox__updatesavebuttons button').on('click', async function () {
 		const data = await collectFormData();
@@ -324,6 +376,10 @@ function insertOrUpdateToDb($form, product) {
 		product = {};
 	}
 
+	/**
+	 * Собирает все данные из формы для сохранения
+	 * @returns {Promise<Object>} Объект с данными товара
+	 */
 	async function collectFormData() {
 		const data = {};
 
@@ -338,7 +394,8 @@ function insertOrUpdateToDb($form, product) {
 		const hasVariants = !mainArtikul;
 
 		// Очищаем артикул для получения SKU (только номер)
-		const sku = parseInt((mainArtikul ?? variantArtikul).replace(/-.*/, '').replace(/v$/, ''));
+		const sku = normalize.int((mainArtikul ?? variantArtikul).replace(/-.*/, '').replace(/v$/, ''));
+		const skuPadStart = sku.toString().padStart(3, '0');
 
 		// Обрабатывает артикул товара в зависимости от условий
 		const artikul = ((artikul) => {
@@ -365,7 +422,7 @@ function insertOrUpdateToDb($form, product) {
 						'id'
 					],
 					where: {
-						sku: sku,
+						sku: skuPadStart,
 						shop_tilda_id: window.projectid
 					},
 					limit: 1
@@ -380,11 +437,11 @@ function insertOrUpdateToDb($form, product) {
 				data.id = productId;
 				data.shop_crm_id = shop.shop_crm_id;
 			}
-			data.sku = RESERVED_ARTICLES.includes(sku) ? artikul : sku;
-			data.vitrina_id = data.sku === 777 ? data.id : form.getInputValue($form.find('#vitrina_id')) || null;
-			data.title = form.getInputValue($form.find('[name="title"]'));
-			data.allowed_today = form.getNumberInputValue($form.find('#allowed_today'));
-			data.card_type = form.getSelectValue($form.find('#card_type'));
+			data.sku = RESERVED_ARTICLES.includes(sku) ? artikul : skuPadStart;
+			data.vitrina_id = data.sku === 777 ? data.id : form.getValue($form.find('#vitrina_id')) || null;
+			data.title = form.getValue($form.find('[name="title"]'));
+			data.allowed_today = form.getNumberValue($form.find('#allowed_today'));
+			data.card_type = form.getValue($form.find('#card_type'));
 			data.hidden = form.getCheckboxValue($form.find('#hidden'));
 			data.evkalipt = form.getCheckboxValue($form.find('#evkalipt'));
 			data.fixed_price = form.getCheckboxValue($form.find('#fixed_price'));
@@ -392,10 +449,10 @@ function insertOrUpdateToDb($form, product) {
 			data.random_sostav = form.getCheckboxValue($form.find('#random_sostav'));
 			data.select_color = form.getCheckboxValue($form.find('#select_color'));
 			data.select_gamma = form.getCheckboxValue($form.find('#select_gamma'));
-			data.days_to_close = form.getNumberInputValue($form.find('#days_to_close'));
-			data.purchase_price = form.getNumberInputValue($form.find('#purchase_price'));
-			data.type = RESERVED_ARTICLES.includes(sku) ? sku : form.getSelectValue($form.find('#type')) || null;
-			data.date_to_open = form.getInputValue($form.find('#date_to_open')) || null;
+			data.days_to_close = form.getNumberValue($form.find('#days_to_close'));
+			data.purchase_price = form.getNumberValue($form.find('#purchase_price'));
+			data.type = RESERVED_ARTICLES.includes(sku) ? sku : form.getValue($form.find('#type')) || null;
+			data.date_to_open = form.getValue($form.find('#date_to_open')) || null;
 			data.card_content = (() => {
 				switch (data.card_type) {
 					case 'text':
@@ -423,9 +480,9 @@ function insertOrUpdateToDb($form, product) {
 
 		return data;
 
-
-
-		// Сбор данных о фотографиях
+		/**
+		 * Сбор данных о фотографиях
+		 */
 		function collectPhotosData() {
 			data.photos = [];
 			$form.find('.js-gallery-item').each(function () {
@@ -441,11 +498,13 @@ function insertOrUpdateToDb($form, product) {
 			});
 		}
 
-		// Сбор текстовых данных (короткий текст, длинный текст, "шта?")
+		/**
+		 * Сбор текстовых данных (короткий текст, длинный текст, "шта?")
+		 */
 		function collectTextsData() {
 			data.texts = {};
-			const shortText = form.getInputValue($form.find('[name="descr"]'));
-			const longText = form.getInputValue($form.find('[name="text"]'));
+			const shortText = form.getValue($form.find('[name="descr"]'));
+			const longText = form.getValue($form.find('[name="text"]'));
 
 			if (shortText) data.texts.short = shortText;
 			if (longText) data.texts.long = longText;
@@ -454,12 +513,14 @@ function insertOrUpdateToDb($form, product) {
 			if (window.projectid == 5683822) {
 				const shtaCont = $form.find('.js-prod-characteristic:first .js-prod-charact-value');
 				if (!shtaCont.length) return;
-				const shtaValue = form.getInputValue(shtaCont);
+				const shtaValue = form.getValue(shtaCont);
 				if (shtaValue) data.texts.shta = shtaValue;
 			}
 		}
 
-		// Сбор данных о разделах, составе, гамме и цвете
+		/**
+		 * Сбор данных о разделах, составе, гамме и цвете
+		 */
 		function collectCharacteristicsData() {
 			data.razdel = [];
 			data.sostav = [];
@@ -483,7 +544,9 @@ function insertOrUpdateToDb($form, product) {
 			});
 		}
 
-		// Сбор данных о вариантах товара
+		/**
+		 * Сбор данных о вариантах товара
+		 */
 		function collectVariantsData() {
 			data.variants = [];
 			const hasVariants = $form.find('[data-field-name]').length > 0;
@@ -509,8 +572,14 @@ function insertOrUpdateToDb($form, product) {
 		}
 	}
 
+	/**
+	 * Сохраняет данные товара в БД
+	 * @param {Object} data - Данные товара для сохранения
+	 * @returns {Promise<void>}
+	 */
 	async function saveProductData(data) {
 		if (product.id) {
+			//обновляем данные в бд
 			await db.request({
 				request: 'products/update',
 				flags: '&logger&' + window.permission_key,
@@ -523,14 +592,15 @@ function insertOrUpdateToDb($form, product) {
 				}
 			});
 		} else {
-			await db.request({
+			//добавляем данные в бд
+			const response = await db.request({
 				request: 'products/insert',
 				flags: '&logger&' + window.permission_key,
 				args: {
 					set: data
 				}
 			});
+			if (response) product.id = $form.find('[name="productuid"]').val();
 		}
-
 	}
 }
