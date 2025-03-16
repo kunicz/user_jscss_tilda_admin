@@ -1,11 +1,11 @@
 import db from '@helpers/db';
-import { ctrlc } from '@helpers/clipboard.js';
-import wait from '@helpers/wait.js';
+import { copy } from '@helpers/clipboard';
+import wait from '@helpers/wait';
 import dom from '@helpers/dom';
-import normalize from '@helpers/normalize.js';
-import form from '@helpers/form.js';
-import { RESERVED_ARTICLES } from '@root/config.js';
-import { shop } from '../index.js';
+import normalize from '@helpers/normalize';
+import form from '@helpers/form';
+import { RESERVED_ARTICLES } from '@root/config';
+import { shop } from '@src';
 
 /**
  * Инициализирует наблюдение за появлением формы редактирования товара
@@ -70,7 +70,7 @@ function articlesTips($form) {
 	$.each(spans, (name, letter) => {
 		const span = $(`<span>${name}&nbsp;(<b>${letter}</b>)</span>`);
 		span.appendTo(disclaimer)
-			.on('click', () => ctrlc(span.children('b').text()));
+			.on('click', () => copy(span.children('b').text()));
 	});
 	disclaimer.insertBefore($form.find('#product_options_table_box'));
 }

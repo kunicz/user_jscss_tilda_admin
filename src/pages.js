@@ -1,7 +1,7 @@
-import page from './page.js';
-import store from './store.js';
-import project from './project.js';
-import projects from './projects.js';
+import page from '@pages/page';
+import store from '@pages/store';
+import project from '@pages/project';
+import projects from '@pages/projects';
 
 export { page, store, project, projects };
 export const routes = {

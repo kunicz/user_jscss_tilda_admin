@@ -1,5 +1,5 @@
-import { shop } from '../index.js';
-import wait from '@helpers/wait.js';
+import { shop } from '@src';
+import wait from '@helpers/wait';
 
 export default async () => {
 	frontendCssInAdmin();

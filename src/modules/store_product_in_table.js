@@ -1,7 +1,7 @@
-import { ctrlc } from '@helpers/clipboard.js';
-import wait from '@helpers/wait.js';
-import normalize from '@helpers/normalize.js';
-import { RESERVED_ARTICLES } from '@root/config.js';
+import { copy } from '@helpers/clipboard';
+import wait from '@helpers/wait';
+import normalize from '@helpers/normalize';
+import { RESERVED_ARTICLES } from '@root/config';
 
 export default async ($node) => {
 	let t = 'td-prod__';
@@ -54,7 +54,7 @@ export default async ($node) => {
 		$(`<a>${tildaId}</a>`)
 			.on("click", function (e) {
 				e.preventDefault();
-				ctrlc(tildaId);
+				copy(tildaId);
 			})
 			.wrap(`<td class="${t}uid"></td>`)
 			.parent()

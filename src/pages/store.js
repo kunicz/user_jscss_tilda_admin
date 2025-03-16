@@ -1,8 +1,8 @@
-import * as products from '../modules/store_products.js';
-import * as product_info from '../modules/store_product_info.js';
-import { tilda } from '@root/config.js';
-import wait from '@helpers/wait.js';
-import '../css/store.css';
+import * as products from '@modules/store_products';
+import * as product_info from '@modules/store_product_info';
+import { tilda } from '@root/config';
+import wait from '@helpers/wait';
+import '@css/store.css';
 
 export default async () => {
 	await reorder();

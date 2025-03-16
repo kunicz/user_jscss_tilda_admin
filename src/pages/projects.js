@@ -1,4 +1,4 @@
-import { shops, page } from '../index.js';
+import { shops, page } from '@src';
 
 export class ProjectsBase {
 	constructor() {

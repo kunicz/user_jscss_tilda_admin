@@ -1,4 +1,4 @@
-import product from './store_product_in_table.js';
+import product from '@modules/store_product_in_table';
 import dom from '@helpers/dom';
 import wait from '@helpers/wait';
 
