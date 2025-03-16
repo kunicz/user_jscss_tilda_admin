@@ -1,6 +1,6 @@
-import product from '@modules/store_product_in_table';
-import dom from '@helpers/dom';
-import wait from '@helpers/wait';
+import product from '@modules/store_product_in_table.mjs';
+import dom from '@helpers/dom.mjs';
+import wait from '@helpers/wait.mjs';
 
 export async function watch() {
 	const selector = '.js-product:not(.processed)';

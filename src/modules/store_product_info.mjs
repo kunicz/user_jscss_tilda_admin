@@ -1,11 +1,11 @@
-import db from '@helpers/db';
-import { copy } from '@helpers/clipboard';
-import wait from '@helpers/wait';
-import dom from '@helpers/dom';
-import normalize from '@helpers/normalize';
-import form from '@helpers/form';
-import { RESERVED_ARTICLES } from '@root/config';
-import { shop } from '@src';
+import db from '@helpers/db.mjs';
+import { copy } from '@helpers/clipboard.mjs';
+import wait from '@helpers/wait.mjs';
+import dom from '@helpers/dom.mjs';
+import normalize from '@helpers/normalize.mjs';
+import form from '@helpers/form.mjs';
+import { RESERVED_ARTICLES } from '@root/config.mjs';
+import { shop } from '@src/index.mjs';
 
 /**
  * Инициализирует наблюдение за появлением формы редактирования товара

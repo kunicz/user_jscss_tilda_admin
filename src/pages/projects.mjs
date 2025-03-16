@@ -1,5 +1,5 @@
-import { shops, page } from '@src';
-
+import { shops } from '@src';
+import initPage from '@src/pages.mjs';
 export class ProjectsBase {
 	constructor() {
 		this.listen();
@@ -12,7 +12,7 @@ export class ProjectsBase {
 			const currentParams = window.location.search;
 			if (currentParams === lastParams) return;
 			clearInterval(int);
-			page();
+			initPage();
 		}, 500);
 	}
 
