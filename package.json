@@ -2,7 +2,10 @@
 	"name": "tilda_admin",
 	"type": "module",
 	"scripts": {
-		"build": "set NODE_PATH=..\\node_modules &&webpack --config webpack.config.js",
-		"watch": "set NODE_PATH=..\\node_modules &&webpack --watch --config webpack.config.js"
+		"build": "set NODE_PATH=..\\@npm\\node_modules &&webpack --config webpack.config.js",
+		"watch": "set NODE_PATH=..\\@npm\\node_modules &&webpack --watch --config webpack.config.js"
+	},
+	"config": {
+		"npm": "../@npm/npm.js"
 	}
 }

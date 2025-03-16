@@ -5,7 +5,7 @@ import '@css/all.css';
 export let shops = [];
 export let shop = {};
 
-window.BUNDLE_VERSION = '2.1.1';
+window.BUNDLE_VERSION = '2.1.2';
 
 try {
 	db.getShops().then(result => {
