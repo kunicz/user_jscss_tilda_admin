@@ -1,7 +1,7 @@
-import * as products from '@modules/store_products.mjs';
-import * as product_info from '@modules/store_product_info.mjs';
-import { tilda } from '@root/config.mjs';
-import wait from '@helpers/wait.mjs';
+import * as products from '@modules/store_products';
+import * as product_info from '@modules/store_product_info';
+import { tilda } from '@root/config';
+import wait from '@helpers/wait';
 import '@css/store.css';
 
 export default async () => {

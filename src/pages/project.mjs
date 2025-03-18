@@ -1,4 +1,4 @@
-import { ProjectsBase } from '@pages/projects.mjs';
+import { ProjectsBase } from '@pages/projects';
 
 class Project extends ProjectsBase {
 	process() {

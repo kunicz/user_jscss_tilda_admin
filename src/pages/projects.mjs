@@ -1,5 +1,5 @@
-import { shops } from '@src';
-import initPage from '@src/pages.mjs';
+import { shops, initPage } from '@src';
+
 export class ProjectsBase {
 	constructor() {
 		this.listen();

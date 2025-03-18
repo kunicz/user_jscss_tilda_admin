@@ -1,7 +1,7 @@
-import { copy } from '@helpers/clipboard.mjs';
-import wait from '@helpers/wait.mjs';
-import normalize from '@helpers/normalize.mjs';
-import { RESERVED_ARTICLES } from '@root/config.mjs';
+import { copy } from '@helpers/clipboard';
+import wait from '@helpers/wait';
+import normalize from '@helpers/normalize';
+import { RESERVED_ARTICLES } from '@root/config';
 
 export default async ($node) => {
 	let t = 'td-prod__';
