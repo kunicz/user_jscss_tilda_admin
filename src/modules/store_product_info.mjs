@@ -24,11 +24,13 @@ export function watch() {
 async function process() {
 	const formElement = await wait.element('[id^="productform"]');
 	if (!formElement) return;
+	if (formElement.classList.contains('processed')) return;
 
 	const $form = $(formElement);
 	articlesTips($form);
 	longAndShortText($form);
 	dbIntegration($form);
+	$form.addClass('processed');
 }
 
 /**
@@ -85,17 +87,14 @@ function articlesTips($form) {
  */
 async function dbIntegration($form) {
 	//витринные варианты каталожных товаров не обрабатываем
-	const product = await db.request({
-		request: 'products/get',
-		flags: '&logger',
-		args: {
-			where: {
-				id: normalize.int($form.attr('id')),
-				shop_tilda_id: window.projectid
-			},
-			limit: 1
-		}
+	const product = await db.table('products').get({
+		where: {
+			id: normalize.int($form.attr('id')),
+			shop_tilda_id: window.projectid
+		},
+		limit: 1
 	});
+	console.log(product);
 	if (product) product.card_content = normalize.cardText(product?.card_content);
 
 	galleryIntegration($form, product);
@@ -414,19 +413,15 @@ function insertOrUpdateToDb($form, product) {
 		if (artikul.endsWith('v')) {
 			//неоригинальный витринный товар
 			//для таких товаров мы только обновляем vitrina_id родительского товара
-			product.id = await db.request({
-				request: 'products/get',
-				flags: '&logger',
-				args: {
-					fields: [
-						'id'
-					],
-					where: {
-						sku: skuPadStart,
-						shop_tilda_id: window.projectid
-					},
-					limit: 1
-				}
+			product.id = await db.table('products').get({
+				fields: [
+					'id'
+				],
+				where: {
+					sku: skuPadStart,
+					shop_tilda_id: window.projectid
+				},
+				limit: 1
 			});
 			if (product.id) {
 				data.vitrina_id = productId;
@@ -574,33 +569,18 @@ function insertOrUpdateToDb($form, product) {
 
 	/**
 	 * Сохраняет данные товара в БД
-	 * @param {Object} data - Данные товара для сохранения
+	 * @param {Object} set - Данные товара для сохранения
 	 * @returns {Promise<void>}
 	 */
-	async function saveProductData(data) {
-		if (product.id) {
-			//обновляем данные в бд
-			await db.request({
-				request: 'products/update',
-				flags: '&logger&' + window.permission_key,
-				args: {
-					set: data,
-					where: {
-						shop_crm_id: shop.shop_crm_id,
-						id: product.id
-					}
-				}
-			});
-		} else {
-			//добавляем данные в бд
-			const response = await db.request({
-				request: 'products/insert',
-				flags: '&logger&' + window.permission_key,
-				args: {
-					set: data
-				}
-			});
-			if (response) product.id = $form.find('[name="productuid"]').val();
+	async function saveProductData(set) {
+		const data = {
+			set: {
+				...set,
+				shop_crm_id: shop.shop_crm_id,
+				id: product.id || null
+			}
 		}
+		const response = await db.table('products').upsert(data);
+		console.log(`product db id: ${response}`);
 	}
 }

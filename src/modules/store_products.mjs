@@ -9,6 +9,7 @@ export async function watch() {
 	// обрабатываем товары
 	$(selector).each((_, e) => product($(e)));
 	// наблюдаем за появлением новых товаров
+	await wait.sec();
 	dom.watcher().setSelector(selector).setCallback((node) => product($(node))).start();
 }
 

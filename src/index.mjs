@@ -18,7 +18,7 @@ export const initPage = () => {
 	bundleVersion().appendTo('body');
 }
 
-window.BUNDLE_VERSION = '2.1.4';
+window.BUNDLE_VERSION = '2.1.5';
 
 try {
 	typeof jQuery !== 'undefined' ? init() : jqueryInit();
@@ -27,14 +27,19 @@ try {
 }
 
 async function init() {
-	shops = await db.getShops();
-	shop = await db.getShop({ shop_tilda_id: window.projectid }) || {};
+	if (!window.projectid) {
+		await new Promise(resolve => setTimeout(resolve, 100));
+		if (!window.projectid) return;
+	}
+
+	shops = await db.table('shops').get();
+	shop = shops.find(shop => Number(shop.shop_tilda_id) === Number(window.projectid));
 	initPage();
 }
 
 function jqueryInit() {
 	const script = document.createElement('script');
 	script.src = 'https://code.jquery.com/jquery-1.10.2.min.js';
-	script.onload = initTilda();
+	script.onload = async () => await init();
 	document.head.appendChild(script);
 }
