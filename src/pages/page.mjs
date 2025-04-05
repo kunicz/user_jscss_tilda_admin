@@ -1,35 +1,40 @@
-import { shop } from '@src';
+import App from '@src';
 import wait from '@helpers/wait';
 
-export default async () => {
-	frontendCssInAdmin();
-}
+export default class Page {
+	static moduleName = 'page';
+	constructor() {
+		this.shop = App.getShop();
+		this.shopCode = this.shop?.shop_crm_code;
+	}
 
-/**
- * собирает все стили из всех html(t123) блоков
- * добавляет свои кастомные стили и стили сайта
- * применяет их на страницах "редактирвоания страниц"
- */
-async function frontendCssInAdmin() {
-	await wait.sec();
+	init() {
+		this.frontendCssInAdmin();
+	}
 
-	const styles = [];
-	$('[data-record-cod="T123"] .css').each(function () {
-		styles.push($(this).text());
-	});
+	// применяет стили бандла и из админки на страницу
+	async frontendCssInAdmin() {
+		await wait.sec();
+		const styles = [];
+		$('[data-record-cod="T123"] .css').each(function () {
+			styles.push($(this).text());
+		});
 
-	//скрываем товары в каталогах
-	styles.push('[data-custom-class$="catalog"] .t776{text-align:center}');
-	styles.push('[data-custom-class$="catalog"] .t776:before{content:"товары каталога"}');
-	styles.push('.js-store{display:none !important;}');
+		//скрываем товары в каталогах
+		styles.push('[data-custom-class$="catalog"] .t776{text-align:center}');
+		styles.push('[data-custom-class$="catalog"] .t776:before{content:"товары каталога"}');
+		styles.push('.js-store{display:none !important;}');
 
-	//применяем стили
-	$('head').append([
-		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.shop_crm_code}.min.css">`,
-		`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${shop.shop_crm_code}.min.css.map">`
-	].join());
-	if (styles.length) {
-		$('body').append('<style id="styles_from_admin_tilda">' + styles.join('') + '</style>');
-		console.log('user_jscss: стили применены');
+		//применяем стили бандла
+		$('head').append([
+			`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${this.shopCode}.min.css">`,
+			`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${this.shopCode}.min.css.map">`
+		].join());
+
+		//применяем стили из админки
+		if (styles.length) {
+			$('body').append('<style id="styles_from_admin_tilda">' + styles.join('') + '</style>');
+			console.log('user_jscss: стили применены');
+		}
 	}
 }

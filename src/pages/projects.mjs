@@ -1,45 +1,44 @@
-import { shops, initPage } from '@src';
+import App from '@src';
 
-export class ProjectsBase {
-	constructor() {
-		this.listen();
-		this.process();
+export default class Projects {
+	static moduleName = 'projects';
+
+	init() {
+		self.listen();
+		this.cityInTitle();
 	}
 
-	listen() {
+	//добавляет город в заголовок
+	cityInTitle() {
+		$('.td-site__section-one[href^="/projects/?projectid"]').each(function () {
+			const $this = $(this);
+			App.project = { id: $this.data('project-id') }; // временно устанавливаем id проекта в цикле
+			self.appendCityToTitle($this.children('.td-site__title'));
+			App.project = null; // и обнуляем, чтобы иметь возможность получить полноценный объект позже в других модулях
+		});
+	}
+
+	//слушает изменения в url
+	//так как модули Products и Product делят между собой один url, то нужно следить за изменениями в search
+	static listen() {
 		let lastParams = window.location.search;
 		const int = setInterval(() => {
 			const currentParams = window.location.search;
 			if (currentParams === lastParams) return;
 			clearInterval(int);
-			initPage();
+			App.init();
 		}, 500);
 	}
 
-	getCity(projectid) {
-		const projectshop = shops.find(s => s.shop_tilda_id == projectid);
-		return projectshop?.city_title;
+	//получает город по id проекта
+	static getCity() {
+		return App.getShop()?.city_title;
 	}
 
-	cityInTitle() { }
-	appendCityToTitle(titleElement, city) {
-		titleElement.html(titleElement.html() + ' (' + city + ')');
-	}
-}
-
-class Projects extends ProjectsBase {
-	process() {
-		this.cityInTitle();
-	}
-
-	cityInTitle() {
-		$('.td-site__section-one[href^="/projects/?projectid"]').each((_, e) => {
-			const $this = $(e);
-			const city = this.getCity($this.data('project-id'));
-			const title = $this.children('.td-site__title');
-			this.appendCityToTitle(title, city);
-		});
+	//добавляет город в ноду
+	static appendCityToTitle($node) {
+		$node.html($node.html() + ' (' + self.getCity() + ')');
 	}
 }
 
-export default () => new Projects();
+const self = Projects;

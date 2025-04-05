@@ -1,15 +1,15 @@
-import { ProjectsBase } from '@pages/projects';
+import Projects from '@pages/projects';
 
-class Project extends ProjectsBase {
-	process() {
+export default class Project {
+	static moduleName = 'project';
+
+	init() {
+		Projects.listen();
 		this.cityInTitle();
 	}
 
+	//добавляет город в заголовок
 	cityInTitle() {
-		const city = this.getCity(window.projectid);
-		const title = $('.td-project-midpanel__site-title');
-		this.appendCityToTitle(title, city);
+		Projects.appendCityToTitle($('.td-project-midpanel__site-title'));
 	}
 }
-
-export default () => new Project();

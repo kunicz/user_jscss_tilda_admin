@@ -1,42 +1,49 @@
-import * as products from '@modules/store_products';
-import * as product_info from '@modules/store_product_info';
-import { tilda } from '@root/config';
+import App from '@src';
+import Products from '@modules/store/products';
+import ProductInfo from '@modules/store/product_info';
+import { TILDA_VITRINA_RAZDEL } from '@root/config';
 import wait from '@helpers/wait';
 import '@css/store.css';
 
-export default async () => {
-	await reorder();
-	products.watch();
-	products.uidTh();
-	products.lastArticle();
-	product_info.watch();
-}
+export default class Store {
+	static moduleName = 'store';
 
-async function reorder() {
-	// Находим select
-	const selectElement = document.querySelector('.td-store__top-controls-box select');
-	if (!selectElement) return; // Проверяем, существует ли элемент
+	constructor() {
+		this.products = new Products();
+		this.product_info = new ProductInfo();
+	}
 
-	// Устанавливаем значение
-	selectElement.value = vitrina() || 'date-xyz';
+	async init() {
+		await this.sort();
+		this.products.init();
+		this.product_info.init();
+	}
 
-	// Создаем и вызываем событие change
-	selectElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true }));
+	// сортировка товаров
+	async sort() {
+		const selectElement = document.querySelector('.td-store__top-controls-box select'); // Находим select
+		if (!selectElement) return; // Проверяем, существует ли элемент
 
-	await wait.sec();
+		selectElement.value = this.vitrinaOrderby() || 'date-xyz'; // Устанавливаем значение		
+		selectElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true })); // Создаем и вызываем событие change
+
+		await wait.sec();
+	}
 
 	// для витрины - порядок сортировки "сперва опубликованные"
-	function vitrina() {
+	vitrinaOrderby() {
 		// Проверка, существует ли проект в storepartuids
-		if (!(window.projecttitle in tilda.vitrinaRazdel)) return null;
+		if (!(App.project.title in TILDA_VITRINA_RAZDEL)) return null;
 
 		// Получаем параметр storepartuid из URL
 		const urlParams = new URLSearchParams(window.location.search);
 		const storepartuid = urlParams.get('storepartuid');
-		if (!storepartuid || storepartuid != tilda.vitrinaRazdel[window.projecttitle]) return null;
+		if (!storepartuid || storepartuid != TILDA_VITRINA_RAZDEL[App.project.title]) return null;
 
 		// Устанавливаем значение
 		return 'off-abc';
 	}
 }
+
+
 
