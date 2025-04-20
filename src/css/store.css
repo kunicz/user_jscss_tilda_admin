@@ -21,3 +21,5 @@ td.td-prod__head-quantity,td.td-prod__quantity{width:70px} /*100 - 30*/
 #group_characteristics .pe-form-group
 {display:none}
 #group_characteristics,#group_properties{display: block !important;}
+#gallery_btns button{display:inline-block; margin-right: 10px;}
+.tstore_variants__btns button{margin-right: 10px;}

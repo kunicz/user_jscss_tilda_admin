@@ -1,10 +1,12 @@
+import RootClass from '@src/root_class';
 import { copy } from '@helpers/clipboard';
 import wait from '@helpers/wait';
 import normalize from '@helpers/normalize';
 import { RESERVED_SKUS } from '@root/config';
 
-export default class StoreProduct {
+export default class ProductsRow extends RootClass {
 	constructor(node) {
+		super();
 		this.$ = $(node);
 		this.t = 'td-prod__';
 		this.id = this.getId();
@@ -16,7 +18,6 @@ export default class StoreProduct {
 
 	init() {
 		if (this.$.is('.processed')) return;
-
 
 		this.processArticle();
 		this.uidTd();

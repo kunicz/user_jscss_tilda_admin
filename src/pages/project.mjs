@@ -1,15 +1,15 @@
-import Projects from '@pages/projects';
+import App from '@src';
 
 export default class Project {
-	static moduleName = 'project';
+	static name = 'project';
 
 	init() {
-		Projects.listen();
 		this.cityInTitle();
 	}
 
 	//добавляет город в заголовок
 	cityInTitle() {
-		Projects.appendCityToTitle($('.td-project-midpanel__site-title'));
+		const $node = $('.td-project-midpanel__site-title');
+		$node.html($node.html() + ` (${App.shop?.city_title})`);
 	}
 }

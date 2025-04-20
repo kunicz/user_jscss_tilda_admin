@@ -1,28 +1,35 @@
+import RootClass from '@src/root_class';
 import { SKU_VITRINA, SKU_PODPISKA, SKU_INDIVIDUAL, SKU_DONAT, SKU_TRANSPORT, SKU_CUSTOMPRICE, SKU_DOPNIK } from '@root/config';
 
-export default class AdditionalFields {
-	constructor(ProductInfo) {
-		this.ProductInfo = ProductInfo;
-		this.$form = ProductInfo.$form;
-		this.productDb = ProductInfo?.productDb || {};
-		this.type = this.productDb?.type;
-		this.purchasePrice = this.productDb?.purchase_price;
-		this.cardType = this.productDb?.card_type;
-		this.randomSostav = this.productDb?.random_sostav;
-		this.selectColor = this.productDb?.select_color;
-		this.selectGamma = this.productDb?.select_gamma;
-		this.evkalipt = this.productDb?.evkalipt;
-		this.fixedPrice = this.productDb?.fixed_price;
-		this.paidDelivery = this.productDb?.paid_delivery;
-		this.allowedToday = this.productDb?.allowed_today;
-		this.daysToClose = this.productDb?.days_to_close;
-		this.dateToOpen = this.productDb?.date_to_open;
-		this.hidden = this.productDb?.hidden;
-		this.vitrinaId = this.productDb?.vitrina_id;
+export default class AdditionalFields extends RootClass {
+	constructor(product) {
+		super();
+		this.product = product;
+		this.$form = product.$form;
+
+		const d = product.data.db;
+		this.type = d?.type;
+		this.cardType = d?.card_type;
+		this.purchasePrice = d?.purchase_price;
+		this.randomSostav = d?.random_sostav;
+		this.selectColor = d?.select_color;
+		this.selectGamma = d?.select_gamma;
+		this.evkalipt = d?.evkalipt;
+		this.fixedPrice = d?.fixed_price;
+		this.paidDelivery = d?.paid_delivery;
+		this.allowedToday = d?.allowed_today;
+		this.daysToClose = d?.days_to_close;
+		this.dateToOpen = d?.date_to_open;
+		this.hidden = d?.hidden;
+		this.vitrinaId = d?.vitrina_id;
 	}
 
 	init() {
 		this.addFields();
+	}
+
+	destroy() {
+		this.$form.off('change', '#type');
 	}
 
 	addFields() {
@@ -39,6 +46,12 @@ export default class AdditionalFields {
 	}
 
 	_type() {
+		// Событие для показа/скрытия поля "Закупочная стоимость" в зависимости от типа товара
+		this.$form.on('change', '#type', (el) => {
+			const type = $(el.target).val();
+			this.$form.find('.pe-form-group.purchase_price').toggle(type == SKU_DOPNIK);
+		});
+
 		return `
 		<div class="pe-form-group">
 			<label class="pe-label">Тип товара (не меняй, если не знаешь)</label>
@@ -54,12 +67,7 @@ export default class AdditionalFields {
 					<option value="${SKU_TRANSPORT}" ${this.type == SKU_TRANSPORT ? 'selected' : ''}>Транспортировочное (${SKU_TRANSPORT})</option>
 				</select>
 			</div>
-		</div>
-		<script>
-		$('[id^="product$form"]  #type').on('change',function(){
-			$('[id^="product$form"] .pe-form-group.purchase_price').toggle($(this).val() == '${SKU_DOPNIK}');
-		});
-		</script>`;
+		</div>`;
 	}
 
 	_purchasePrice() {

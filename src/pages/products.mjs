@@ -1,22 +1,26 @@
 import App from '@src';
-import Products from '@modules/store/products';
-import ProductInfo from '@modules/store/product_info';
+import RootClass from '@src/root_class';
+import ProductsRows from '@modules/products/rows';
 import { TILDA_VITRINA_RAZDEL } from '@root/config';
 import wait from '@helpers/wait';
 import '@css/store.css';
 
-export default class Store {
-	static moduleName = 'store';
+export default class Products extends RootClass {
+	static name = 'products';
 
 	constructor() {
-		this.products = new Products();
-		this.product_info = new ProductInfo();
+		super();
+		this.products = new ProductsRows();
 	}
 
 	async init() {
 		await this.sort();
 		this.products.init();
-		this.product_info.init();
+	}
+
+	destroy() {
+		this.products.destroy();
+		super.destroy();
 	}
 
 	// сортировка товаров
@@ -26,24 +30,20 @@ export default class Store {
 
 		selectElement.value = this.vitrinaOrderby() || 'date-xyz'; // Устанавливаем значение		
 		selectElement.dispatchEvent(new Event('change', { bubbles: true, cancelable: true })); // Создаем и вызываем событие change
-
 		await wait.sec();
 	}
 
 	// для витрины - порядок сортировки "сперва опубликованные"
 	vitrinaOrderby() {
 		// Проверка, существует ли проект в storepartuids
-		if (!(App.project.title in TILDA_VITRINA_RAZDEL)) return null;
+		if (!(App.shop.title in TILDA_VITRINA_RAZDEL)) return null;
 
 		// Получаем параметр storepartuid из URL
 		const urlParams = new URLSearchParams(window.location.search);
 		const storepartuid = urlParams.get('storepartuid');
-		if (!storepartuid || storepartuid != TILDA_VITRINA_RAZDEL[App.project.title]) return null;
+		if (!storepartuid || storepartuid != TILDA_VITRINA_RAZDEL[App.shop.title]) return null;
 
 		// Устанавливаем значение
 		return 'off-abc';
 	}
 }
-
-
-
