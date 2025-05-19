@@ -1,30 +1,25 @@
+import RootClass from '@helpers/root_class';
 import Page from '@pages/page';
 import Product from '@pages/product';
 import Products from '@pages/products';
 import Project from '@pages/project';
 import Projects from '@pages/projects';
 import db from '@helpers/db';
-import is from '@helpers/is';
+import dom from '@helpers/dom';
 import wait from '@helpers/wait';
-
-import observers from '@helpers/observers';
-import intervals from '@helpers/intervals';
-import timeouts from '@helpers/timeouts';
-
 import '@css/all.css';
 
-window.BUNDLE_VERSION = '2.2.0';
+window.BUNDLE_VERSION = '3.0.1';
 
-export default class App {
+export default class App extends RootClass {
 	static shop = null;
 	static shops = null;
-	static module = null;
+	static page = null;
 	static href = null;
 
 	async init() {
 		await App.setShops();
-		await this.initJquery();
-		await this.initModule();
+		await this.initPage();
 		this.listen();
 		this.version();
 	}
@@ -48,63 +43,45 @@ export default class App {
 				return result;
 			};
 		});
-		['popstate', 'pushState', 'replaceState'].forEach(e => window.addEventListener(e, this.initModule));
+		['popstate', 'pushState', 'replaceState'].forEach(e => window.addEventListener(e, this.initPage));
 	}
 
 	//инициализирует модуль страницы
-	async initModule() {
+	async initPage() {
 		// нужно удостовериться, что url действительно изменился, чтоб не инициализировать несколько инстансов модуля
 		if (App.href == window.location.href) return;
 		App.href = window.location.href;
 
-		const modules = new Map([
+		const pages = new Map([
 			[/page/, Page],
 			[/store\/(?!.*productuid=)/, Products],
 			[/store\/\?.*productuid=/, Product],
 			[/projects\/\?/, Project],
 			[/projects\/$/, Projects]
 		]);
-		for (const [pattern, module] of modules) {
+		for (const [pattern, page] of pages) {
 			if (!pattern.test(window.location.href)) continue;
 
 			await wait.halfsec();
 
 			// выводит в консоль имя модуля
-			console.log(`user_jscss : tilda_admin/${module.name}`);
+			console.log(`user_jscss : tilda_admin/${page.name}`);
 
 			// уничтожает предыдущий модуль
-			if (App.module) {
-				observers.clear(App.module.constructor.name);
-				intervals.clear(App.module.constructor.name);
-				timeouts.clear(App.module.constructor.name);
-				App.module.destroy?.();
-			}
+			if (App.page) App.page.destroy?.();
 
 			// создает новый модуль
 			App.setShop();
-			App.module = new module();
+			App.page = new page();
 
 			// инициализирует модуль
-			await Promise.resolve(App.module.init());
+			await Promise.resolve(App.page.init());
 		}
-	}
-
-	//инициализирует jquery
-	async initJquery() {
-		return new Promise((resolve, reject) => {
-			if (!is.undefined(window.jQuery)) return resolve();
-
-			const script = document.createElement('script');
-			script.src = 'https://code.jquery.com/jquery-1.10.2.min.js';
-			script.onload = resolve;
-			script.onerror = reject;
-			document.head.appendChild(script);
-		});
 	}
 
 	//добавляет вирсию бандла
 	version() {
-		$(`<div id="bundleVersion">v${window.BUNDLE_VERSION}</div>`).appendTo('body');
+		dom(`<div id="bundleVersion">v${window.BUNDLE_VERSION}</div>`).lastTo('body');
 	}
 
 	//дополняет массив проектов из тильды данными из базы

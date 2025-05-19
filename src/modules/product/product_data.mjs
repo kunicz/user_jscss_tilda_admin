@@ -1,58 +1,63 @@
-import RootClass from '@src/root_class';
-import { SKU_PODPISKA } from '@root/config';
-import normalize from '@helpers/normalize';
+import { ARTIKUL_PODPISKA } from '@root/config';
+import { formSelector } from '@modules/product/selectors';
+import RootClass from '@helpers/root_class';
+import ensure from '@helpers/ensure';
+import dom from '@helpers/dom';
 
 export default class ProductData extends RootClass {
-	constructor(product) {
+	constructor() {
 		super();
 		this.data = {};
-		this.product = product;
-		product.data = this.data;
-		this.$form = product.$form;
+		this.form = dom(formSelector);
+		this.skuMain = this.getSkuMain();
+		this.skuVariant = this.getSkuVariant();
+		this.sku = this.getSku();
 	}
 
 	init() {
-		this.data.id = this.id();
-		this.data.title = this.title();
-		this.data.artikulMain = this.artikulMain();
-		this.data.artikulVariant = this.artikulVariant();
-		this.data.hasVariants = this.hasVariants();
-		this.data.artikul = this.artikul();
-		this.data.sku = this.sku();
+		this.form.data('id', this.getId());
+		this.form.data('title', this.getTitle());
+		this.form.data('hasVariants', this.hasVariants());
+		this.form.data('artikul', this.getArtikul());
+		this.form.data('is_catalog_vitrina', this.isCatalogVitrina());
+		this.form.data('is_vitrina', this.isVitrina());
 	}
 
-	id() {
-		return normalize.int(this.$form.attr('id'));
+	getId() {
+		return ensure.int(this.form.attr('id'));
 	}
 
-	title() {
-		return this.$form.find('[name="title"]')?.val();
+	getTitle() {
+		return this.form.node('[name="title"]')?.val();
 	}
 
-	artikulMain() {
-		// артикул, если товар без вариантов
-		return this.$form.find('[name="sku"]')?.val();
+	getSkuMain() { // если товар без вариантов		
+		return this.form.node('[name="sku"]')?.val();
 	}
 
-	artikulVariant() {
-		// артикул, если товар с вариантами
-		return this.$form.find('[data-field-name="sku"]:first')?.val();
+	getSkuVariant() {// если товар с вариантами		
+		return this.form.node('[data-field-name="sku"]:first-child')?.val();
+	}
+
+	getSku() {
+		let sku = this.skuMain || this.skuVariant;
+		if (this.hasVariants() && sku.startsWith(ARTIKUL_PODPISKA)) sku = sku.replace(/\d+x\d+$/, '');
+		return sku;
+	}
+
+	getArtikul() {
+		return this.sku.replace(/-.*/, '').replace(/v$/, '');
 	}
 
 	hasVariants() {
-		return this.$form.find('[data-field-name="sku"]:first')?.val() !== this.data.artikulMain;
+		return this.skuMain !== this.skuVariant;
 	}
 
-	artikul() {
-		let artikul = this.data.artikulMain || this.data.artikulVariant;
-		if (this.data.hasVariants && this.data.sku === SKU_PODPISKA) {
-			artikul = artikul.replace(/\d+x\d+$/, '');
-		}
-		return artikul;
+	isCatalogVitrina() {
+		return this.sku.at(-1) === 'v';
 	}
 
-	sku() {
-		// Очищаем артикул для получения SKU (только номер)
-		return this.data.artikul.replace(/-.*/, '').replace(/v$/, '').padStart(3, '0');
+	isVitrina() {
+		return (this.isCatalogVitrina() || this.sku.startsWith('777'));
 	}
 }

@@ -1,40 +1,34 @@
-import RootClass from '@src/root_class';
+import RootClass from '@helpers/root_class';
+import FromDataBuilder from '@modules/product/form_data';
+import { saveSelector } from '@modules/product/selectors';
 import db from '@helpers/db';
+import dom from '@helpers/dom';
 import App from '@src';
 
 export default class DBUpsert extends RootClass {
-	constructor(product) {
+	constructor() {
 		super();
-		this.product = product;
-		this.saveBtn = $('.tstore__editbox__updatesavebuttons button');
+		this.FormData = new FromDataBuilder();
 	}
 
 	init() {
-		this.saveBtn.on('click', async () => {
-			const formData = await this.product.formData.init();
-			this.upsert(formData);
+		dom(saveSelector).nodes('button').forEach(el => {
+			el.listen('click', this.upsert.bind(this));
 		});
 	}
 
-	destroy() {
-		this.saveBtn.off('click');
-	}
-
 	// сохраняет данные в БД
-	async upsert(data) {
+	async upsert() {
+		const data = await this.FormData.build();
+		if (!data.id) throw new Error('отсутсвует id');
 		const args = {
 			set: {
 				...data,
 				shop_crm_id: App.shop.shop_crm_id,
 			}
 		}
-		console.log('данные переданные в БД', args.set);
-		if (!data.id) {
-			console.log('заказ не сохраняем в БД');
-		} else {
-			const response = await db.table('products').upsert(args);
-			console.log(!Number(response) ? 'изменений нет' : `заказ сохранен в БД: ${response}`);
-		}
+		console.log('данные переданные в БД:', args.set);
+		const response = await db.table('products').upsert(args);
+		console.log(!Number(response) ? 'изменений нет' : `заказ сохранен в БД: ${response}`);
 	}
-
 }

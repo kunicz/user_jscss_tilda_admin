@@ -1,52 +1,54 @@
-import RootClass from '@src/root_class';
+import RootClass from '@helpers/root_class';
+import { formSelector } from '@modules/product/selectors';
 import Gallery from '@modules/product/gallery';
 import AdditionalFields from '@modules/product/additional_fields';
 import DBUpsert from '@modules/product/db_upsert';
 import db from '@helpers/db';
+import is from '@helpers/is';
+import dom from '@helpers/dom';
 import App from '@src';
 
 export default class DBIntegration extends RootClass {
-	constructor(product) {
+	constructor() {
 		super();
-		this.product = product;
-		this.gallery = null;
-		this.dbUpsert = null;
-		this.additionalFields = null;
+		this.form = dom(formSelector);
+		this.Gallery = new Gallery();
+		this.DBUpsert = new DBUpsert();
+		this.AdditionalFields = new AdditionalFields();
 	}
 
 	async init() {
 		// дополняем данные товара данными из БД
-		this.product.data.db = await this.getProductFromDb();
-
+		const dbData = await this.getProductFromDb();
+		this.parseDbData(dbData);
 		// когла данные полные, инициализируем компоненты
-		this.gallery = this.initComponent(Gallery);
-		this.additionalFields = this.initComponent(AdditionalFields);
-		this.dbUpsert = this.initComponent(DBUpsert);
-	}
-
-	destroy() {
-		this.gallery.destroy();
-		this.additionalFields.destroy();
-		this.dbUpsert.destroy();
-		super.destroy();
+		this.Gallery.init();
+		this.AdditionalFields.init();
+		this.DBUpsert.init();
 	}
 
 	// получаем данные о товаре из БД
 	async getProductFromDb() {
 		const productDb = await db.table('products').get({
 			where: {
-				id: this.product.data.id,
+				id: this.form.data('id'),
 				shop_tilda_id: App.shop.shop_tilda_id
 			},
 			limit: 1
 		});
+		// временный костыль из-за перепутанности artikul и sku
+		// надо будет поменять в БД название колонки
+		productDb.artikul = productDb.sku; delete (productDb.sku);
 		return productDb;
 	}
 
-	// инициализирует компонент
-	initComponent(ComponentClass) {
-		const component = new ComponentClass(this.product);
-		component.init();
-		return component;
+	// добавляем данные о товаре и бд в ноду
+	parseDbData(data) {
+		Object.entries(data)
+			.sort(([a], [b]) => a.localeCompare(b))
+			.forEach(([key, value]) => {
+				if (this.form.data(key)) return;
+				this.form.data(key, is.null(value) ? '' : value);
+			});
 	}
 }

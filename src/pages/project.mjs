@@ -1,6 +1,8 @@
+import RootClass from '@helpers/root_class';
 import App from '@src';
+import dom from '@helpers/dom';
 
-export default class Project {
+export default class Project extends RootClass {
 	static name = 'project';
 
 	init() {
@@ -9,7 +11,7 @@ export default class Project {
 
 	//добавляет город в заголовок
 	cityInTitle() {
-		const $node = $('.td-project-midpanel__site-title');
-		$node.html($node.html() + ` (${App.shop?.city_title})`);
+		const el = dom('.td-project-midpanel__site-title');
+		el.html(`${el.html()} (${App.shop?.city_title})`);
 	}
 }

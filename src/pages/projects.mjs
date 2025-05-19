@@ -1,6 +1,8 @@
+import RootClass from '@helpers/root_class';
 import App from '@src';
+import dom from '@helpers/dom';
 
-export default class Projects {
+export default class Projects extends RootClass {
 	static name = 'projects';
 
 	init() {
@@ -9,11 +11,13 @@ export default class Projects {
 
 	//добавляет город в заголовок
 	cityInTitle() {
-		$('.td-site__section-one[href^="/projects"]').each((_, e) => {
-			const $this = $(e);
-			const $node = $this.children('.td-site__title');
-			const city = App.shops.find(shop => shop.shop_tilda_id == $this.data('project-id')).city_title;
-			$node.html($node.html() + ` (${city})`);
+		const items = dom('.td-site__section-one[href^="/projects"]');
+		console.log(items);
+		items.forEach(item => {
+			const target = item.node('.td-site__title');
+			const city = App.shops.find(shop => shop.shop_tilda_id == item.data('project-id'))?.city_title;
+			const content = target?.html();
+			if (target && city) target.html(`${content} (${city})`);
 		});
 	}
 }

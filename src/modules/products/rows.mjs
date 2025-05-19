@@ -1,50 +1,40 @@
-import RootClass from '@src/root_class';
+import RootClass from '@helpers/root_class';
 import Product from '@modules/products/row';
-import observers from '@helpers/observers';
 import wait from '@helpers/wait';
+import { d } from '@helpers/dom';
 
 export default class ProductsRows extends RootClass {
 	constructor() {
 		super();
 		this.t = 'td-prod';
-		this.observer = observers.add('products', 'rows');
+		this.observer = this.setObserver();
 		this.selector = '.js-product:not(.processed)';
 		this.productsCache = new Map();
-		this.$lastArticle = null;
 	}
 
 	init() {
-		this.lastArticle();
+		this.lastArtikul();
 		this.uidTh();
 		this.listen();
 		this.products();
-	}
-
-	destroy() {
-		this.productsCache.forEach(product => product.destroy());
-		this.productsCache.clear();
-		super.destroy();
 	}
 
 	// слушает добавление товаров
 	listen() {
 		this.observer
 			.setSelector(this.selector)
-			.onAdded((node) => this.product(node))
+			.onAdded((el) => this.product(el))
 			.start();
 	}
 
 	// инициализирует товары
 	async products() {
-		const node = await wait.element(this.selector);
-		if (!node) throw new Error('Товары не найдены');
-
-		const nodes = document.querySelectorAll(this.selector);
-		nodes.forEach(node => this.product(node));
+		await wait.element(this.selector);
+		d(this.selector).forEach(el => this.product(el));
 	}
 
-	product(node) {
-		const product = new Product(node);
+	product(el) {
+		const product = new Product(el);
 		this.productsCache.set(product.id, product);
 		product.init();
 	}
@@ -61,10 +51,10 @@ export default class ProductsRows extends RootClass {
 
 	// добавляет блок с последним артикулом
 	// если он уже существует, то ничего не делаем
-	lastArticle() {
-		if ($('body').find('#td-lastArticle').length) return;
+	lastArtikul() {
+		if (d('body').node('#td-lastArtikul')) return;
 
-		const cont = $(`<div id="td-lastArticle"><div class="td-store__top-controls-box__wrapper">Последний артикул: <span id="lastArticle">0</span></div></div>`);
-		cont.insertBefore($('.td-prod__listbox'));
+		d(`<div id="td-lastArtikul"><div class="td-store__top-controls-box__wrapper">Последний артикул: <span id="lastArtikul">0</span></div></div>`)
+			.prevTo('.td-prod__listbox');
 	}
 }

@@ -1,18 +1,22 @@
+import RootClass from '@helpers/root_class';
 import App from '@src';
 import wait from '@helpers/wait';
+import dom from '@helpers/dom';
 
-export default class Page {
+export default class Page extends RootClass {
 	static name = 'page';
 
 	async init() {
 		await wait.sec();
 		this.frontendCssInAdmin();
+
 	}
 
 	// применяет стили бандла и из админки на страницу
 	async frontendCssInAdmin() {
 		const styles = [];
-		$('[data-record-cod="T123"] .css').each((_, e) => styles.push($(e).text()));
+		console.log(dom('[data-record-cod="T123"] .css'));
+		dom('[data-record-cod="T123"] .css').forEach(el => styles.push(el.txt()));
 
 		//скрываем товары в каталогах
 		styles.push('[data-custom-class$="catalog"] .t776{text-align:center}');
@@ -21,14 +25,14 @@ export default class Page {
 
 		//применяем стили бандла
 		const code = App.shop?.shop_crm_code;
-		$('head').append([
+		[
 			`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${code}.min.css">`,
 			`<link rel="stylesheet" type="text/css" href="https://php.2steblya.ru/jscss/tilda_frontend/${code}.min.css.map">`
-		].join());
+		].forEach(el => dom(el).lastTo('body'));
 
 		//применяем стили из админки
 		if (styles.length) {
-			$('body').append('<style id="styles_from_admin_tilda">' + styles.join('') + '</style>');
+			dom(`<style id="styles_from_admin_tilda">${styles.join('')}</style>`).lastTo('body');
 			console.log('user_jscss: стили применены');
 		}
 	}

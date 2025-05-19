@@ -4,7 +4,7 @@
 .tstore__editbox__form-wrapper{padding:0 20px}
 
 /*tableProducts*/
-#lastArticle{font-weight:bold}
+#lastArtikul{font-weight:bold}
 td.td-prod__head-uid,td.td-prod__td-uid{width:140px}
 td.td-prod__head-sku,td.td-prod__sku{width:75px} /*165 - 80*/
 td.td-prod__head-price,td.td-prod__price{width:110px} /*140 - 30*/
@@ -23,3 +23,4 @@ td.td-prod__head-quantity,td.td-prod__quantity{width:70px} /*100 - 30*/
 #group_characteristics,#group_properties{display: block !important;}
 #gallery_btns button{display:inline-block; margin-right: 10px;}
 .tstore_variants__btns button{margin-right: 10px;}
+.pe-input{padding-top:10px}
