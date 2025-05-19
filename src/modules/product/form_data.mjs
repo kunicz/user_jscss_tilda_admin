@@ -4,17 +4,19 @@ import { RESERVED_ARTIKULS, ARTIKUL_VITRINA } from '@root/config';
 import { default as formHelper } from '@helpers/form';
 import db from '@helpers/db';
 import dom from '@helpers/dom';
-import { formSelector, variantSelector, naphotoSelector, galleryItemSelector, galleryItemContainerSelector } from '@modules/product/selectors';
+import selectors from '@modules/product/selectors';
 
 export default class FormDataBuilder extends RootClass {
 	constructor() {
 		super();
-		this.form = dom(formSelector);
-		this.data = this.collapseData();
-		this.galleryItems = this.form.nodes(galleryItemSelector);
+		this.form = dom(selectors.form);
+		this.data = {};
+		this.galleryItems = [];
 	}
 
 	async build() {
+		this.data = this.collapseData();
+		this.galleryItems = this.form.nodes(selectors.photo);
 		return await (this.data['is_catalog_vitrina'] ? this.productVitrina() : Promise.resolve(this.productNormal()));
 	}
 
@@ -22,9 +24,9 @@ export default class FormDataBuilder extends RootClass {
 	collapseData() {
 		const old = this.form.data();
 		const cur = new FormData(this.form);
-		const updated = { ...old }
-		for (const [key, value] of cur.entries()) updated[key] = value;
-		return updated;
+		const merged = { ...old }
+		for (const [key, value] of cur.entries()) merged[key] = value;
+		return merged;
 	}
 
 	//неоригинальный витринный товар
@@ -94,9 +96,9 @@ export default class FormDataBuilder extends RootClass {
 		const data = [];
 		this.galleryItems.forEach(el => {
 			const photo = {};
-			const naphoto = naphotoSelector.slice(1);
-			const razmer = el.node(naphotoSelector + 'razmer')?.val();
-			const doptext = el.node(naphotoSelector + 'doptext')?.val();
+			const naphoto = selectors.naphoto.slice(1);
+			const razmer = el.node(selectors.naphoto + 'razmer')?.val();
+			const doptext = el.node(selectors.naphoto + 'doptext')?.val();
 
 			photo.url = el.data('src');
 			if (razmer) photo[naphoto + 'razmer'] = razmer;
@@ -151,10 +153,10 @@ export default class FormDataBuilder extends RootClass {
 	// Сбор данных о вариантах товара
 	collectVariantsData() {
 		const data = [];
-		const variants = this.form.nodes(variantSelector);
+		const variants = this.form.nodes(selectors.variant);
 		if (variants.length) {
 			variants.forEach(el => {
-				const a = el.ancestor(galleryItemContainerSelector);
+				const a = el.ancestor(selectors.photoCont);
 				data.push({
 					artikul: a.node('[data-field-name="sku"]').val(),
 					price: a.node('[data-field-name="price"]').val(),

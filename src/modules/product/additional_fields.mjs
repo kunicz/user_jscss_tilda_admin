@@ -1,12 +1,12 @@
 import RootClass from '@helpers/root_class';
 import { ARTIKUL_VITRINA, ARTIKUL_PODPISKA, ARTIKUL_INDIVIDUAL, ARTIKUL_DONAT, ARTIKUL_TRANSPORT, ARTIKUL_CUSTOMPRICE, ARTIKUL_DOPNIK } from '@root/config';
-import { formSelector } from '@modules/product/selectors';
+import selectors from '@modules/product/selectors';
 import dom from '@helpers/dom';
 
 export default class AdditionalFields extends RootClass {
 	constructor() {
 		super();
-		this.form = dom(formSelector);
+		this.form = dom(selectors.form);
 		this.data = this.form.data()
 	}
 

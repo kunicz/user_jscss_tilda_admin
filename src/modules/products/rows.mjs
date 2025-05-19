@@ -1,7 +1,7 @@
 import RootClass from '@helpers/root_class';
 import Product from '@modules/products/row';
 import wait from '@helpers/wait';
-import { d } from '@helpers/dom';
+import dom from '@helpers/dom';
 
 export default class ProductsRows extends RootClass {
 	constructor() {
@@ -30,7 +30,7 @@ export default class ProductsRows extends RootClass {
 	// инициализирует товары
 	async products() {
 		await wait.element(this.selector);
-		d(this.selector).forEach(el => this.product(el));
+		dom(this.selector).forEach(el => this.product(el));
 	}
 
 	product(el) {
@@ -39,22 +39,24 @@ export default class ProductsRows extends RootClass {
 		product.init();
 	}
 
-
 	// добавляет заголовок "UID" в колонку
 	// если он уже существует, то ничего не делаем
 	uidTh() {
 		const t = `${this.t}__head`;
-		if ($(`.${t}-table .${t}-uid`).length) return;
-
-		$(`.${t}-table .${t}-title`).after(`<td class="${t}-uid">UID</td>`);
+		const uidEl = dom(`.${t}-uid`);
+		const titleEl = dom(`.${t}-title`);
+		if (!uidEl) titleEl.toNext(`<td class="${t}-uid">UID</td>`);
 	}
 
 	// добавляет блок с последним артикулом
 	// если он уже существует, то ничего не делаем
 	lastArtikul() {
-		if (d('body').node('#td-lastArtikul')) return;
-
-		d(`<div id="td-lastArtikul"><div class="td-store__top-controls-box__wrapper">Последний артикул: <span id="lastArtikul">0</span></div></div>`)
-			.prevTo('.td-prod__listbox');
+		if (dom('body').node('#td-lastArtikul')) return;
+		dom(`
+		<div id="td-lastArtikul">
+			<div class="td-store__top-controls-box__wrapper">
+				Последний артикул: <span id="lastArtikul">0</span>
+			</div>
+		</div>`).prevTo('.td-prod__listbox');
 	}
 }

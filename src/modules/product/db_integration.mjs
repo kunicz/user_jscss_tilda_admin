@@ -1,5 +1,5 @@
 import RootClass from '@helpers/root_class';
-import { formSelector } from '@modules/product/selectors';
+import selectors from '@modules/product/selectors';
 import Gallery from '@modules/product/gallery';
 import AdditionalFields from '@modules/product/additional_fields';
 import DBUpsert from '@modules/product/db_upsert';
@@ -11,7 +11,7 @@ import App from '@src';
 export default class DBIntegration extends RootClass {
 	constructor() {
 		super();
-		this.form = dom(formSelector);
+		this.form = dom(selectors.form);
 		this.Gallery = new Gallery();
 		this.DBUpsert = new DBUpsert();
 		this.AdditionalFields = new AdditionalFields();

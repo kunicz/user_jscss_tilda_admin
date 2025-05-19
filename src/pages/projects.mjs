@@ -11,9 +11,7 @@ export default class Projects extends RootClass {
 
 	//добавляет город в заголовок
 	cityInTitle() {
-		const items = dom('.td-site__section-one[href^="/projects"]');
-		console.log(items);
-		items.forEach(item => {
+		dom('.td-site__section-one[href^="/projects"]').forEach(item => {
 			const target = item.node('.td-site__title');
 			const city = App.shops.find(shop => shop.shop_tilda_id == item.data('project-id'))?.city_title;
 			const content = target?.html();

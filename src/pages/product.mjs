@@ -1,10 +1,9 @@
 import RootClass from '@helpers/root_class';
-import dom from '@helpers/dom';
-import { copy } from '@helpers/clipboard';
 import DBIntegration from '@modules/product/db_integration';
 import ProductData from '@modules/product/product_data';
-import FormData from '@modules/product/form_data';
-import { formSelector, variantSelector, groupSelector } from '@modules/product/selectors';
+import selectors from '@modules/product/selectors';
+import dom from '@helpers/dom';
+import { copy } from '@helpers/clipboard';
 import { btn } from '@src/utils';
 
 export default class Product extends RootClass {
@@ -12,10 +11,9 @@ export default class Product extends RootClass {
 
 	constructor() {
 		super();
-		this.form = dom(formSelector); // форма
+		this.form = dom(selectors.form);
 		this.DBIntegration = null;
 		this.ProductData = null;
-		this.removeVariantsBtn = btn.clone();
 	}
 
 	init() {
@@ -31,7 +29,7 @@ export default class Product extends RootClass {
 
 	// меняем тильдовские заголовки: Описание -> Короткий текст / Текст -> Длинный текст
 	longAndShortText() {
-		const els = this.form.childs(groupSelector);
+		const els = this.form.childs(selectors.group);
 		els[1].child('.pe-label').txt('Короткий текст');
 		els[2].child('.pe-label').txt('Длинный текст');
 	}
@@ -63,14 +61,13 @@ export default class Product extends RootClass {
 	// удаляет варианты товара
 	removeVariants() {
 		const cb = () => {
-			const variants = dom(variantSelector);
+			const variants = dom(selectors.variant);
 			if (variants.length < 2) return;
 			variants.forEach((el, i) => {
 				if (i === 0) return;
 				el.parent().nextAll().at(-1).child('button').trigger('click');
 			});
 		};
-
-		this.removeVariantsBtn.txt('Удалить варианты').lastTo('.tstore_variants__btns').listen('click', cb);
+		btn.clone().txt('Удалить варианты').lastTo('.tstore_variants__btns').listen('click', cb);
 	}
 }

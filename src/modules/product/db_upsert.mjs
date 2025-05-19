@@ -1,6 +1,5 @@
 import RootClass from '@helpers/root_class';
 import FromDataBuilder from '@modules/product/form_data';
-import { saveSelector } from '@modules/product/selectors';
 import db from '@helpers/db';
 import dom from '@helpers/dom';
 import App from '@src';
@@ -12,7 +11,7 @@ export default class DBUpsert extends RootClass {
 	}
 
 	init() {
-		dom(saveSelector).nodes('button').forEach(el => {
+		dom('.tstore__editbox__updatesavebuttons button').forEach(el => {
 			el.listen('click', this.upsert.bind(this));
 		});
 	}

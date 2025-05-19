@@ -1,5 +1,5 @@
 import { ARTIKUL_PODPISKA } from '@root/config';
-import { formSelector } from '@modules/product/selectors';
+import selectors from '@modules/product/selectors';
 import RootClass from '@helpers/root_class';
 import ensure from '@helpers/ensure';
 import dom from '@helpers/dom';
@@ -8,7 +8,7 @@ export default class ProductData extends RootClass {
 	constructor() {
 		super();
 		this.data = {};
-		this.form = dom(formSelector);
+		this.form = dom(selectors.form);
 		this.skuMain = this.getSkuMain();
 		this.skuVariant = this.getSkuVariant();
 		this.sku = this.getSku();
