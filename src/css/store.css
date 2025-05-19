@@ -5,6 +5,7 @@
 
 /*tableProducts*/
 #lastArtikul{font-weight:bold}
+.td-prod.vitrina{background-color: #e0e4e9;}
 td.td-prod__head-uid,td.td-prod__td-uid{width:140px}
 td.td-prod__head-sku,td.td-prod__sku{width:75px} /*165 - 80*/
 td.td-prod__head-price,td.td-prod__price{width:110px} /*140 - 30*/

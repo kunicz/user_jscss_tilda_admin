@@ -9,7 +9,6 @@ export default class ProductsRows extends RootClass {
 		this.t = 'td-prod';
 		this.observer = this.setObserver();
 		this.selector = '.js-product:not(.processed)';
-		this.productsCache = new Map();
 	}
 
 	init() {
@@ -34,9 +33,7 @@ export default class ProductsRows extends RootClass {
 	}
 
 	product(el) {
-		const product = new Product(el);
-		this.productsCache.set(product.id, product);
-		product.init();
+		new Product(el).init();
 	}
 
 	// добавляет заголовок "UID" в колонку

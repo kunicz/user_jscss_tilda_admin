@@ -9,7 +9,7 @@ import dom from '@helpers/dom';
 import wait from '@helpers/wait';
 import '@css/all.css';
 
-window.BUNDLE_VERSION = '3.0.2';
+window.BUNDLE_VERSION = '3.0.3';
 
 export default class App extends RootClass {
 	static shop = null;

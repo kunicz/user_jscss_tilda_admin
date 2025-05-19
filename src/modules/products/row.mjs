@@ -10,8 +10,8 @@ export default class ProductsRow extends RootClass {
 		super();
 		this.el = dom(el);
 		this.t = 'td-prod__';
-		this.id = this.getId();
-		this.title = this.getTitle();
+		this.id = this.el.data('store-product-uid');
+		this.title = this.el.node(`.${this.t}td-title__btn`).txt();
 		this.artikul = null;
 		this.lastArtikul = dom('#lastArtikul');
 		this.isVitrina = false;
@@ -20,8 +20,7 @@ export default class ProductsRow extends RootClass {
 	init() {
 		if (this.el.is('.processed')) return;
 		this.uidTd();
-		this.defineArtikul();
-		this.markVitrina();
+		this.processArtikul();
 		this.el.addClass('processed');
 	}
 
@@ -32,6 +31,31 @@ export default class ProductsRow extends RootClass {
 			.wrap(`<td class="${this.t}uid"></td>`);
 	}
 
+	// определяем артикул по sku
+	async processArtikul() {
+		const variants = this.el.nodes(`.${this.t}variants-expand`);
+		if (!variants.length) {
+			this.processSku(this.el.node(`.${this.t}sku`).txt());
+			return;
+		}
+		variants.forEach(async btn => {
+			btn.trigger('click');
+			await wait.check(() => !!this.el.child('.js-edition'));
+			this.processSku(this.el.child('.js-edition').node(`.${this.t}sku`).txt());
+			btn.trigger('click');
+		});
+	}
+
+	//обрабатываем sku
+	processSku(sku) {
+		this.isVitrina = sku.at(-1) === 'v' || sku.startsWith(ARTIKUL_VITRINA);
+		this.artikul = sku.split('-')[0];
+
+		this.defineLastArtikul();
+		this.drawArtikul();
+		this.markVitrina();
+	}
+
 	// устанавливаем последний артикул, если текущий артикул больше последнего
 	// RESERVED_ARTIKULS в рассчете не участвуют
 	defineLastArtikul() {
@@ -40,49 +64,13 @@ export default class ProductsRow extends RootClass {
 		if (cur < this.artikul) this.lastArtikul.txt(this.artikul);
 	}
 
-	// определяем артикул по sku
-	async defineArtikul() {
-		const processArtikul = (sku) => {
-			this.isVitrina = sku.at(-1) === 'v' || sku.startsWith(ARTIKUL_VITRINA);
-			this.artikul = this.getArtikul(sku);
-			this.processArtikul();
-		}
-		const variants = this.el.nodes(`.${this.t}variants-expand`);
-		if (!variants.length) {
-			const sku = this.el.node(`.${this.t}sku`).txt();
-			processArtikul(sku);
-			return;
-		}
-		variants.forEach(async btn => {
-			btn.trigger('click');
-			await wait.check(() => !!this.el.child('.js-edition'));
-			const sku = this.el.child('.js-edition').node(`.${this.t}sku`).txt();
-			processArtikul(sku);
-			btn.trigger('click');
-		});
-	}
-
-	// обрабатываем артикул
-	processArtikul() {
-		this.defineLastArtikul();
-		const artikul = (this.artikul + (this.isVitrina && this.artikul.at(-1) !== 'v' ? 'v' : ''));
-		this.el.node(`.${this.t}sku`).txt(artikul);
+	// выводим артикул в таблицу
+	drawArtikul() {
+		this.el.node(`.${this.t}sku`).txt(this.artikul + (this.isVitrina && this.artikul.at(-1) !== 'v' ? 'v' : ''));
 	}
 
 	// подстветим витринные товары
 	markVitrina() {
 		if (this.isVitrina) this.el.addClass('vitrina');
-	}
-
-	getTitle() {
-		return this.el.node(`.${this.t}td-title__btn`).txt();
-	}
-
-	getId() {
-		return this.el.data('store-product-uid');
-	}
-
-	getArtikul(sku) {
-		return sku?.split('-')[0];
 	}
 }
